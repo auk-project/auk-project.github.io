@@ -21,67 +21,25 @@
   <body>
     <a class="skip-link" href="#capability-atlas">Skip to content</a>
 
-    <!-- ===== Global navigation (sticky) ===== -->
-    <nav class="top-nav" aria-label="Primary">
-      <a class="top-nav__brand" href="#top">
-        <img src="assets/brand/hunyuan-mark.png" alt="" />
-        <span>Auk</span>
-      </a>
-      <ul class="top-nav__links">
-        <li><a href="#capability-atlas">Overview</a></li>
-        <li><a href="#architecture">Architecture</a></li>
-        <li><a href="#demos">Demos</a></li>
-        <li><a href="#results">Results</a></li>
-        <li><a href="#citation">Citation</a></li>
-      </ul>
-    </nav>
-
     <!-- ===== Hero ===== -->
     <header class="hero is-fullheight" id="top">
       <div class="hero-body hero-body--auk">
         <div class="container is-max-desktop">
           <div class="hero__inner">
-            <p class="hero__eyebrow">Tencent Hunyuan · SJTU · SII</p>
             <h1 class="title is-1 publication-title">
-              Auk: A Unified Foundational Model for Speech Generation and Editing
+              Auk: An Open-Source Foundational Model for Speech Generation and Editing
             </h1>
             <p class="hero__lede">
-              One model, one natural-language interface, and five task families:
-              speech generation, content editing, enhancement and separation,
+              One model, one natural-language interface, and 15 speech tasks
+              covering generation, content editing, enhancement and separation,
               paralinguistic editing, and acoustic editing. Auk ships with
-              <strong>Auk-Flash</strong>, a 4-step distilled variant that keeps
-              the same capabilities at a 4.5× speedup.
+              <strong>Auk-Flash</strong>, a 4-step distilled variant that
+              delivers near-equivalent editing quality at a 4.5× speedup.
             </p>
-
-            <div class="publication-authors" id="authors-block">
-              <span class="author-block">&lt;authors&gt;</span>
-              <span class="author-sep">·</span>
-              <span class="author-block">Tencent Hunyuan</span>
-              <span class="author-sep">·</span>
-              <span class="author-block">Shanghai Jiao Tong University</span>
-              <span class="author-sep">·</span>
-              <span class="author-block">Shanghai Innovation Institution</span>
-            </div>
 
             <div class="publication-links" id="resource-links"></div>
 
             <ul class="hero__stats" id="hero-stats"></ul>
-          </div>
-
-          <div class="hero__featured">
-            <div class="hero__featured-card">
-              <div class="hero__featured-head">
-                <span class="hero__featured-pill">Featured A/B</span>
-                <h2 class="hero__featured-title">Speech Enhancement</h2>
-                <p class="hero__featured-desc">
-                  Noisy recording on the left, Auk restoration on the right.
-                </p>
-              </div>
-              <div
-                class="auk-player-mount"
-                data-auk-player='{"tracks":[{"url":"assets/audio/enhancement-source.wav","label":"Source","side":"a"},{"url":"assets/audio/enhancement-output.wav","label":"Auk output","side":"b"}],"caption":"<caption>"}'
-              ></div>
-            </div>
           </div>
         </div>
       </div>
@@ -106,51 +64,42 @@
       </div>
     </section>
 
-    <!-- ===== Capability Atlas ===== -->
+    <!-- ===== Capability Atlas (no caption) ===== -->
     <section class="section capability-atlas-section" id="capability-atlas">
       <div class="container is-max-desktop">
         <h2 class="title is-3 section-title has-text-centered">
-          A unified interface for every audible transformation
+          15 speech tasks under a single natural-language interface
         </h2>
-        <p class="section-lede has-text-centered">
-          Auk consumes a natural-language instruction and an optional reference
-          audio, and emits a 24-kHz waveform. The same backbone covers all five
-          task families below.
-        </p>
         <figure class="atlas-figure">
           <img
             src="assets/figures/auk-capabilities.png"
-            alt="Auk capabilities grouped into Speech Generation, Content Editing, Paralinguistic Editing, Acoustic Editing, and Enhancement and Separation."
+            alt="Auk capabilities grouped into five task families."
           />
-          <figcaption class="placeholder">
-            &lt;caption&gt; Auk capabilities grouped into five task families.
-          </figcaption>
         </figure>
-        <ul class="family-legend" id="family-legend"></ul>
       </div>
     </section>
 
-    <!-- ===== Architecture (before demos) ===== -->
+    <!-- ===== Architecture (left half only) ===== -->
     <section class="section architecture-section" id="architecture">
       <div class="container is-max-desktop">
         <h2 class="title is-3 section-title has-text-centered">Architecture</h2>
         <p class="section-lede has-text-centered">
-          A multimodal language model provides semantic conditioning, a 50 Hz
-          VAE supplies reference acoustic latents, and a FLUX-style hybrid
-          transformer fuses them through dual-stream MMDiT blocks and
-          single-stream DiT blocks.
+          A multimodal language model encodes the instruction (and optional reference audio);
+          a 50 Hz VAE provides acoustic latents; a FLUX-style hybrid transformer fuses
+          the two streams and predicts the denoised latent decoded by the VAE.
         </p>
-        <figure class="arch-figure">
+        <figure class="arch-figure arch-figure--left">
           <img
             src="assets/figures/auk-architecture.png"
-            alt="Auk architecture diagram showing the MLLM semantic branch, the VAE acoustic branch, the dual-stream MMDiT blocks, and the single-stream DiT blocks feeding the VAE decoder."
+            alt="Auk architecture: MLLM semantic branch and VAE acoustic branch feeding the hybrid transformer and VAE decoder."
           />
           <figcaption>
-            <span class="placeholder">&lt;caption&gt;</span> Auk architecture
-            overview. MLLM semantic condition (top) and VAE reference acoustic
-            latents (middle) flow through <em>M</em> dual-stream MMDiT blocks
-            before being concatenated and refined by <em>N</em> single-stream
-            DiT blocks, whose output is decoded by the VAE.
+            <strong>Figure 1.</strong> Auk architecture. The MLLM (top) supplies the
+            semantic condition; the VAE (bottom) supplies the reference acoustic
+            latent and the noisy target latent. Both streams pass through
+            <em>M</em> dual-stream MMDiT blocks, are concatenated, refined by
+            <em>N</em> single-stream DiT blocks, and decoded by the VAE. Frozen
+            modules are marked with snowflakes.
           </figcaption>
         </figure>
 
@@ -159,7 +108,7 @@
             <h3>MLLM semantic condition</h3>
             <p>
               Qwen2.5-Omni encodes the instruction jointly with the optional
-              reference audio. A learnable weighted sum of the layer-wise hidden
+              reference audio. A learnable weighted sum of layer-wise hidden
               states is layer-normalized to form the semantic condition.
             </p>
           </div>
@@ -195,15 +144,15 @@
             alt="Sunburst of Auk pre-training data: five task families expand into instruction-level operations."
           />
           <figcaption>
-            Pre-training taxonomy. The inner ring groups the five task
-            families; the outer rings enumerate the instruction-level
-            operations that Auk learns jointly.
+            <strong>Figure 2.</strong> Pre-training taxonomy. The inner ring groups
+            the five task families; the outer rings enumerate the instruction-level
+            operations Auk learns jointly.
           </figcaption>
         </figure>
       </div>
     </section>
 
-    <!-- ===== Demos ===== -->
+    <!-- ===== Demos (single sticky capability bar) ===== -->
     <div class="family-rail" id="family-rail" aria-label="Capabilities"></div>
     <main class="demos" id="demos">
       <div class="container is-max-desktop">
@@ -214,80 +163,20 @@
     <!-- ===== Auk-Flash ===== -->
     <section class="section flash-section" id="flash">
       <div class="container is-max-desktop">
-        <div class="columns is-vcentered is-variable is-8">
-          <div class="column is-half">
-            <h2 class="title is-3 section-title">Auk-Flash: 4 steps, 4.5× faster</h2>
-            <p>
-              Auk-Flash is distilled from Auk in two stages. A trajectory-level
-              consistency initialization hands a few-step student over to a
-              task-routing decoupled DMD objective, which supervises separation
-              samples with a clean-prediction regression and keeps them out of
-              the DMD loop. The result preserves the base model's editing
-              breadth while removing the inference cost.
-            </p>
-            <ul class="flash-stats">
-              <li><strong>4</strong><span>function evaluations</span></li>
-              <li><strong>0</strong><span>CFG at inference</span></li>
-              <li><strong>4.5×</strong><span>vs. Auk base</span></li>
-            </ul>
-          </div>
-          <div class="column is-half">
-            <div class="flash-comparison">
-              <div class="flash-comparison__row">
-                <span class="flash-comparison__label">Auk base</span>
-                <div class="flash-comparison__bar flash-comparison__bar--base"></div>
-                <span class="flash-comparison__value">32 NFE</span>
-              </div>
-              <div class="flash-comparison__row">
-                <span class="flash-comparison__label">Auk-Flash</span>
-                <div class="flash-comparison__bar flash-comparison__bar--flash"></div>
-                <span class="flash-comparison__value">4 NFE</span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <h3 class="flash-demos__title">Auk-Flash demos</h3>
-        <div class="flash-demos">
-          <article class="demo-card placeholder-card">
-            <div class="demo-card__head">
-              <h4 class="demo-card__label">Zero-shot TTS (Auk-Flash)</h4>
-              <span class="lang-pill">zh</span>
-            </div>
-            <p class="placeholder-text">[audio|<instruction><reference audio description>]</p>
-          </article>
-          <article class="demo-card placeholder-card">
-            <div class="demo-card__head">
-              <h4 class="demo-card__label">Instruct TTS (Auk-Flash)</h4>
-              <span class="lang-pill">zh</span>
-            </div>
-            <p class="placeholder-text">[audio|<instruction><reference audio description>]</p>
-          </article>
-          <article class="demo-card placeholder-card">
-            <div class="demo-card__head">
-              <h4 class="demo-card__label">Separate Speech (Auk-Flash)</h4>
-              <span class="lang-pill">zh</span>
-            </div>
-            <p class="placeholder-text">[audio|<instruction><reference audio description>]</p>
-          </article>
-        </div>
-      </div>
-    </section>
-
-    <!-- ===== Results ===== -->
-    <section class="section results-section" id="results">
-      <div class="container is-max-desktop">
-        <h2 class="title is-3 section-title has-text-centered">Evidence</h2>
-        <p class="section-lede has-text-centered">
-          Benchmarks from the technical report. Metric direction is shown with
-          every cell. Higher is better unless marked ↓.
+        <h2 class="title is-3 section-title">Auk-Flash: 4 steps, 4.5× faster</h2>
+        <p>
+          Auk-Flash is distilled from Auk in two stages. A trajectory-level
+          consistency initialization hands a few-step student over to a
+          task-routing decoupled DMD objective, which supervises separation
+          samples with a clean-prediction regression and keeps them out of
+          the DMD loop. The result preserves the base model's editing
+          breadth while removing the inference cost.
         </p>
-        <div class="benchmark-blocks" id="benchmark-blocks"></div>
-        <p class="placeholder results-note">
-          &lt;additional benchmarks&gt; — full tables for Seed-TTS-Eval,
-          SpeechEditBench, MMAE-Speech, DNSChallenge, CHIME4, Libri2Mix, and
-          VCTK-SR will be linked from the technical report PDF.
-        </p>
+        <ul class="flash-stats">
+          <li><strong>4</strong><span>function evaluations</span></li>
+          <li><strong>0</strong><span>CFG at inference</span></li>
+          <li><strong>4.5×</strong><span>vs. Auk base</span></li>
+        </ul>
       </div>
     </section>
 
@@ -295,9 +184,7 @@
     <section class="section citation-section" id="citation">
       <div class="container is-max-desktop content">
         <h2 class="title is-3 section-title">Citation</h2>
-        <p>
-          If you use Auk in your research, please cite the technical report:
-        </p>
+        <p>If you use Auk in your research, please cite the technical report:</p>
         <pre class="bibtex-block"><code id="bibtex-code">@misc{&lt;citation key&gt;,
   title   = {Auk Technical Report: An Open-Source Foundational Model for Speech Generation and Editing},
   author  = {&lt;authors&gt;},

@@ -1,12 +1,14 @@
-// Auk demo content schema & dataset (16 tasks).
-// Missing metadata stays as `<...>` placeholders; missing audio samples use
-// the literal syntax `[audio|<instruction><reference audio description>]`.
+// Auk demo content schema & dataset.
+// 15 speech tasks. Missing metadata stays as `<...>`; missing audio samples
+// use the literal syntax `[audio|<instruction><reference audio description>]`.
 
-export type DemoKind = "single" | "pair" | "multi" | "placeholder";
+export type DemoKind = "single" | "pair" | "multi" | "placeholder" | "slider";
 
 export interface AudioAsset {
   src?: string;
   out?: string;
+  /** Optional secondary output for slider-style controls. */
+  outs?: { label: string; url: string }[];
 }
 
 export interface Placeholder {
@@ -20,7 +22,7 @@ export interface DemoSample {
   label: string;
   hint?: string;
   transcript?: string;
-  instruction?: string;
+  instruction: string;
   audio: AudioAsset | Placeholder;
 }
 
@@ -28,6 +30,7 @@ export interface DemoGroup {
   id: string;
   title: string;
   subtitle: string;
+  /** `slider` is used for rate / volume / pitch with one source + several outs. */
   layout: DemoKind;
   samples: DemoSample[];
   note?: string;
@@ -41,85 +44,98 @@ export interface CapabilityFamily {
   groups: DemoGroup[];
 }
 
-// ---- reusable placeholder ----
-const missing = (label: string): Placeholder => ({
+const ph = (): Placeholder => ({
   missing: true,
   text: `[audio|<instruction><reference audio description>]`,
 });
-void missing;
 
 export const capabilities: CapabilityFamily[] = [
   {
     id: "speech-generation",
-    name: "Speech Generation",
+    name: "Text-to-Speech",
     tagline: "Synthesize speech from text",
-    intro:
-      "Auk generates natural speech from text — either by describing the voice in free-form language (Instruct TTS) or by cloning a speaker from a short reference clip (Zero-shot TTS).",
+    intro: "Generate speech directly from text — by describing the voice in free-form language, or by cloning a speaker from a short reference clip.",
     groups: [
       {
         id: "instruct-tts",
         title: "Instruct TTS",
-        subtitle: "Text synthesis from a voice description · no reference audio needed",
+        subtitle: "Voice described in natural language · no reference audio needed",
         layout: "single",
         samples: [
           {
             id: "instruct-tts-zh-1",
             lang: "zh",
-            label: "用年轻女生的温柔体贴的语气说：",
-            transcript: "欢迎回来，今天上班累不累呀",
+            label: "Instruct TTS · Mandarin",
             instruction: "用年轻女生的温柔体贴的语气说",
+            transcript: "欢迎回来，今天上班累不累呀",
             audio: { out: "assets/audio/instruct-tts-output.wav" },
           },
           {
             id: "instruct-tts-zh-2",
             lang: "zh",
-            label: "Another voice description (Mandarin)",
+            label: "Instruct TTS · Mandarin",
             instruction: "<instruction>",
             transcript: "<target text>",
-            audio: missing("instruct-tts-zh-2"),
+            audio: ph(),
           },
           {
             id: "instruct-tts-en-1",
             lang: "en",
-            label: "A second voice description (English)",
+            label: "Instruct TTS · English",
             instruction: "<instruction>",
             transcript: "<target text>",
-            audio: missing("instruct-tts-en-1"),
+            audio: ph(),
+          },
+          {
+            id: "instruct-tts-en-2",
+            lang: "en",
+            label: "Instruct TTS · English",
+            instruction: "<instruction>",
+            transcript: "<target text>",
+            audio: ph(),
           },
         ],
       },
       {
         id: "zero-shot-tts",
-        title: "Zero-shot TTS",
-        subtitle: "Voice cloning from a reference clip · upload reference audio",
+        title: "Zero-Shot TTS",
+        subtitle: "Voice cloned from a reference clip",
         layout: "pair",
         samples: [
           {
             id: "zs-tts-zh-1",
             lang: "zh",
-            label: "用这个人的声音说：",
-            transcript: "大家好，欢迎收看今天的节目",
+            label: "Zero-Shot TTS · Mandarin",
             instruction: "用这个人的声音说",
+            transcript: "大家好，欢迎收看今天的节目",
             audio: {
               src: "assets/audio/zero-shot-reference.wav",
               out: "assets/audio/zero-shot-output.wav",
             },
           },
           {
-            id: "zs-tts-en-1",
-            lang: "en",
-            label: "English target text with the same voice",
+            id: "zs-tts-zh-2",
+            lang: "zh",
+            label: "Zero-Shot TTS · Mandarin",
             instruction: "<instruction>",
             transcript: "<target text>",
-            audio: missing("zs-tts-en-1"),
+            audio: ph(),
           },
           {
-            id: "zs-tts-hard-1",
-            lang: "zh",
-            label: "Hard text (tongue twister)",
+            id: "zs-tts-en-1",
+            lang: "en",
+            label: "Zero-Shot TTS · English",
             instruction: "<instruction>",
             transcript: "<target text>",
-            audio: missing("zs-tts-hard-1"),
+            audio: ph(),
+          },
+          {
+            id: "zs-tts-en-2",
+            lang: "en",
+            label: "Zero-Shot TTS · English",
+            instruction: "<instruction>",
+            transcript: "<target text>",
+            audio: ph(),
           },
         ],
       },
@@ -128,20 +144,19 @@ export const capabilities: CapabilityFamily[] = [
   {
     id: "content-editing",
     name: "Content Editing",
-    tagline: "Edit what is said",
-    intro:
-      "Auk inserts, deletes, or replaces the spoken content of a recording while preserving the speaker's identity, prosody, and the surrounding acoustic context.",
+    tagline: "Insert, delete, or replace the spoken content",
+    intro: "Modify the words of a recording while preserving the speaker's identity, prosody, and the surrounding acoustic context.",
     groups: [
       {
-        id: "content-edit",
-        title: "Content Edit",
-        subtitle: "Change words while keeping the voice",
+        id: "content-edit-speech",
+        title: "Speech Content Editing",
+        subtitle: "Insert / Delete / Replace · spoken words",
         layout: "pair",
         samples: [
           {
-            id: "content-edit-1",
+            id: "content-speech-replace-zh-1",
             lang: "zh",
-            label: "把“今天”改成“明天”",
+            label: "Replace · Mandarin",
             instruction: "把“今天”改成“明天”",
             transcript: "<source transcript> → <target transcript>",
             audio: {
@@ -150,20 +165,87 @@ export const capabilities: CapabilityFamily[] = [
             },
           },
           {
-            id: "content-edit-2",
+            id: "content-speech-insert-zh-1",
             lang: "zh",
-            label: "Insert a phrase (Mandarin)",
+            label: "Insert · Mandarin",
             instruction: "<instruction>",
             transcript: "<source transcript> → <target transcript>",
-            audio: missing("content-edit-2"),
+            audio: ph(),
           },
           {
-            id: "content-edit-3",
-            lang: "en",
-            label: "Replace a phrase (English)",
+            id: "content-speech-delete-zh-1",
+            lang: "zh",
+            label: "Delete · Mandarin",
             instruction: "<instruction>",
             transcript: "<source transcript> → <target transcript>",
-            audio: missing("content-edit-3"),
+            audio: ph(),
+          },
+          {
+            id: "content-speech-replace-en-1",
+            lang: "en",
+            label: "Replace · English",
+            instruction: "<instruction>",
+            transcript: "<source transcript> → <target transcript>",
+            audio: ph(),
+          },
+          {
+            id: "content-speech-insert-en-1",
+            lang: "en",
+            label: "Insert · English",
+            instruction: "<instruction>",
+            transcript: "<source transcript> → <target transcript>",
+            audio: ph(),
+          },
+          {
+            id: "content-speech-delete-en-1",
+            lang: "en",
+            label: "Delete · English",
+            instruction: "<instruction>",
+            transcript: "<source transcript> → <target transcript>",
+            audio: ph(),
+          },
+        ],
+      },
+      {
+        id: "vocal-edit",
+        title: "Vocal Edit",
+        subtitle: "Insert / Delete / Replace · sung lyrics",
+        layout: "pair",
+        samples: [
+          {
+            id: "vocal-edit-replace-zh-1",
+            lang: "zh",
+            label: "Vocal Edit · Mandarin",
+            instruction: "把这首歌里唱的“明天你好”改成“未来你好”",
+            transcript: "<source lyrics> → <target lyrics>",
+            audio: {
+              src: "assets/audio/lyric-edit-source.wav",
+              out: "assets/audio/lyric-edit-output.wav",
+            },
+          },
+          {
+            id: "vocal-edit-replace-zh-2",
+            lang: "zh",
+            label: "Vocal Edit · Mandarin",
+            instruction: "<instruction>",
+            transcript: "<source lyrics> → <target lyrics>",
+            audio: ph(),
+          },
+          {
+            id: "vocal-edit-replace-en-1",
+            lang: "en",
+            label: "Vocal Edit · English",
+            instruction: "<instruction>",
+            transcript: "<source lyrics> → <target lyrics>",
+            audio: ph(),
+          },
+          {
+            id: "vocal-edit-replace-en-2",
+            lang: "en",
+            label: "Vocal Edit · English",
+            instruction: "<instruction>",
+            transcript: "<source lyrics> → <target lyrics>",
+            audio: ph(),
           },
         ],
       },
@@ -173,20 +255,20 @@ export const capabilities: CapabilityFamily[] = [
     id: "enhancement-separation",
     name: "Enhancement and Separation",
     tagline: "Clean, isolate, or restore audio",
-    intro:
-      "Auk restores degraded recordings, separates speakers, extracts vocals, and improves quality — all from natural-language instructions.",
+    intro: "Restore degraded recordings, separate speakers, extract vocals, and improve quality — all from natural-language instructions.",
     groups: [
       {
-        id: "speech-enhancement",
+        id: "enhance-speech",
         title: "Enhance Speech",
-        subtitle: "Remove background noise for a clean voice",
+        subtitle: "Remove noise, restore clarity",
         layout: "pair",
         samples: [
           {
             id: "enhance-1",
             lang: "zh",
-            label: "把背景噪音去掉，声音干净点",
+            label: "Enhance Speech · Mandarin",
             instruction: "把背景噪音去掉，声音干净点",
+            transcript: "<noisy speech> → <clean speech>",
             audio: {
               src: "assets/audio/enhancement-source.wav",
               out: "assets/audio/enhancement-output.wav",
@@ -194,76 +276,146 @@ export const capabilities: CapabilityFamily[] = [
           },
           {
             id: "enhance-2",
-            lang: "en",
-            label: "Another noisy recording",
+            lang: "zh",
+            label: "Enhance Speech · Mandarin",
             instruction: "<instruction>",
-            audio: missing("enhance-2"),
+            audio: ph(),
+          },
+          {
+            id: "enhance-3",
+            lang: "en",
+            label: "Enhance Speech · English",
+            instruction: "<instruction>",
+            audio: ph(),
+          },
+          {
+            id: "enhance-4",
+            lang: "en",
+            label: "Enhance Speech · English",
+            instruction: "<instruction>",
+            audio: ph(),
           },
         ],
       },
       {
-        id: "speech-separation",
+        id: "separate-speech",
         title: "Separate Speech",
-        subtitle: "Keep one speaker from a conversation",
-        layout: "multi",
-        samples: [
-          {
-            id: "separate-1",
-            lang: "zh",
-            label: "只保留第一个说话的人",
-            instruction: "只保留第一个说话的人",
-            audio: missing("separate-1"),
-          },
-          {
-            id: "separate-2",
-            lang: "en",
-            label: "Extract the speaker who says “yes”",
-            instruction: "<instruction>",
-            audio: missing("separate-2"),
-          },
-        ],
-      },
-      {
-        id: "vocal-extract",
-        title: "Extract Vocals",
-        subtitle: "Vocal out, accompaniment out",
-        layout: "multi",
-        samples: [
-          {
-            id: "vocals-1",
-            lang: "zh",
-            label: "提取人声，去掉伴奏",
-            instruction: "提取人声，去掉伴奏",
-            audio: missing("vocals-1"),
-          },
-          {
-            id: "vocals-2",
-            lang: "en",
-            label: "Extract the instrumental track",
-            instruction: "<instruction>",
-            audio: missing("vocals-2"),
-          },
-        ],
-      },
-      {
-        id: "quality-improve",
-        title: "Improve Quality",
-        subtitle: "Restore clarity from a telephone-like recording",
+        subtitle: "By content, order, or loudest speaker · 3 cues × 2 languages",
         layout: "pair",
         samples: [
           {
-            id: "quality-1",
+            id: "ss-content-zh-1",
             lang: "zh",
-            label: "音质太差像打电话，提升清晰度",
-            instruction: "音质太差像打电话，提升清晰度",
-            audio: missing("quality-1"),
+            label: "Separate by content · Mandarin",
+            instruction: "只保留说“明天”的那个人",
+            audio: ph(),
           },
           {
-            id: "quality-2",
+            id: "ss-order-zh-1",
+            lang: "zh",
+            label: "Separate by speaking order · Mandarin",
+            instruction: "只保留第一个说话的人",
+            audio: ph(),
+          },
+          {
+            id: "ss-loudest-zh-1",
+            lang: "zh",
+            label: "Separate the loudest speaker · Mandarin",
+            instruction: "只保留声音最大的那个人",
+            audio: ph(),
+          },
+          {
+            id: "ss-content-en-1",
             lang: "en",
-            label: "Bandwidth extension demo",
+            label: "Separate by content · English",
             instruction: "<instruction>",
-            audio: missing("quality-2"),
+            audio: ph(),
+          },
+          {
+            id: "ss-order-en-1",
+            lang: "en",
+            label: "Separate by speaking order · English",
+            instruction: "<instruction>",
+            audio: ph(),
+          },
+          {
+            id: "ss-loudest-en-1",
+            lang: "en",
+            label: "Separate the loudest speaker · English",
+            instruction: "<instruction>",
+            audio: ph(),
+          },
+        ],
+      },
+      {
+        id: "extract-vocals",
+        title: "Extract Vocals",
+        subtitle: "Vocal out / accompaniment out / enhance",
+        layout: "pair",
+        samples: [
+          {
+            id: "ev-zh-1",
+            lang: "zh",
+            label: "Extract Vocals · Mandarin",
+            instruction: "提取人声，去掉伴奏",
+            audio: ph(),
+          },
+          {
+            id: "ev-zh-2",
+            lang: "zh",
+            label: "Extract Vocals · Mandarin",
+            instruction: "<instruction>",
+            audio: ph(),
+          },
+          {
+            id: "ev-en-1",
+            lang: "en",
+            label: "Extract Vocals · English",
+            instruction: "<instruction>",
+            audio: ph(),
+          },
+          {
+            id: "ev-en-2",
+            lang: "en",
+            label: "Extract Vocals · English",
+            instruction: "<instruction>",
+            audio: ph(),
+          },
+        ],
+      },
+      {
+        id: "super-resolution",
+        title: "Improve Quality",
+        subtitle: "Super-resolution / bandwidth extension",
+        layout: "pair",
+        samples: [
+          {
+            id: "sr-zh-1",
+            lang: "zh",
+            label: "Improve Quality · Mandarin",
+            instruction: "音质太差像打电话，提升清晰度",
+            audio: ph(),
+          },
+          {
+            id: "sr-zh-2",
+            lang: "zh",
+            label: "Improve Quality · Mandarin",
+            instruction: "<instruction>",
+            audio: ph(),
+          },
+          {
+            id: "sr-en-1",
+            lang: "en",
+            label: "Improve Quality · English",
+            instruction: "<instruction>",
+            audio: ph(),
+          },
+          {
+            id: "sr-en-2",
+            lang: "en",
+            label: "Improve Quality · English",
+            instruction: "<instruction>",
+            audio: ph(),
           },
         ],
       },
@@ -271,138 +423,130 @@ export const capabilities: CapabilityFamily[] = [
   },
   {
     id: "paralinguistic",
-    name: "Paralinguistic and Voice Editing",
-    tagline: "Edit how something is said",
-    intro:
-      "Auk changes the emotional color, timbre, accent, whisper style, and non-verbal events of an utterance without touching its words.",
+    name: "Paralinguistic Editing",
+    tagline: "Edit how something is said, not what is said",
+    intro: "Change emotion, voice identity, non-verbal events, whisper style, and accent without changing the words.",
     groups: [
       {
         id: "emotion-edit",
         title: "Emotion Edit",
-        subtitle: "Change the emotional delivery",
+        subtitle: "Angry · Happy · Sad · Fearful · Surprised · Disgusted · Calm · Excited",
         layout: "pair",
         samples: [
           {
             id: "emotion-1",
             lang: "zh",
-            label: "让他听起来开心点",
+            label: "Emotion Edit · Mandarin",
             instruction: "让他听起来开心点",
             audio: {
               src: "assets/audio/emotion-source.wav",
               out: "assets/audio/emotion-output.wav",
             },
           },
-          {
-            id: "emotion-2",
-            lang: "zh",
-            label: "听起来难过一点",
-            instruction: "<instruction>",
-            audio: missing("emotion-2"),
-          },
-          {
-            id: "emotion-3",
-            lang: "en",
-            label: "Make it sound angry",
-            instruction: "<instruction>",
-            audio: missing("emotion-3"),
-          },
+          { id: "emotion-angry-1", lang: "zh", label: "Angry", instruction: "听起来生气一点", audio: ph() },
+          { id: "emotion-happy-1", lang: "zh", label: "Happy", instruction: "听起来开心一点", audio: ph() },
+          { id: "emotion-sad-1", lang: "zh", label: "Sad", instruction: "听起来难过一点", audio: ph() },
+          { id: "emotion-fearful-1", lang: "zh", label: "Fearful", instruction: "听起来害怕一点", audio: ph() },
+          { id: "emotion-surprised-1", lang: "zh", label: "Surprised", instruction: "听起来惊讶一点", audio: ph() },
+          { id: "emotion-disgusted-1", lang: "zh", label: "Disgusted", instruction: "听起来厌恶一点", audio: ph() },
+          { id: "emotion-calm-1", lang: "zh", label: "Calm", instruction: "听起来平静一点", audio: ph() },
+          { id: "emotion-excited-1", lang: "zh", label: "Excited", instruction: "听起来兴奋一点", audio: ph() },
         ],
       },
       {
         id: "voice-edit",
         title: "Voice Edit",
-        subtitle: "Change timbre, keep the words",
+        subtitle: "Replace the speaker identity · keep the words",
         layout: "pair",
         samples: [
           {
             id: "voice-edit-1",
             lang: "zh",
-            label: "把这段话的声音换成低沉磁性的男声，内容别变",
+            label: "Voice Edit · Mandarin",
             instruction: "把这段话的声音换成低沉磁性的男声，内容别变",
             audio: {
               src: "assets/audio/timbre-source.wav",
               out: "assets/audio/timbre-output.wav",
             },
           },
-          {
-            id: "voice-edit-2",
-            lang: "zh",
-            label: "换成活泼的女声",
-            instruction: "<instruction>",
-            audio: missing("voice-edit-2"),
-          },
+          { id: "voice-edit-zh-2", lang: "zh", label: "Voice Edit · Mandarin", instruction: "换成活泼开朗的女声", audio: ph() },
+          { id: "voice-edit-zh-3", lang: "zh", label: "Voice Edit · Mandarin", instruction: "换成浑厚的中年男声", audio: ph() },
+          { id: "voice-edit-zh-4", lang: "zh", label: "Voice Edit · Mandarin", instruction: "换成温柔的年轻女声", audio: ph() },
+          { id: "voice-edit-zh-5", lang: "zh", label: "Voice Edit · Mandarin", instruction: "换成少年音", audio: ph() },
+          { id: "voice-edit-zh-6", lang: "zh", label: "Voice Edit · Mandarin", instruction: "换成老年沙哑的男声", audio: ph() },
+          { id: "voice-edit-en-1", lang: "en", label: "Voice Edit · English", instruction: "<instruction>", audio: ph() },
+          { id: "voice-edit-en-2", lang: "en", label: "Voice Edit · English", instruction: "<instruction>", audio: ph() },
+          { id: "voice-edit-en-3", lang: "en", label: "Voice Edit · English", instruction: "<instruction>", audio: ph() },
+          { id: "voice-edit-en-4", lang: "en", label: "Voice Edit · English", instruction: "<instruction>", audio: ph() },
+          { id: "voice-edit-en-5", lang: "en", label: "Voice Edit · English", instruction: "<instruction>", audio: ph() },
+          { id: "voice-edit-en-6", lang: "en", label: "Voice Edit · English", instruction: "<instruction>", audio: ph() },
         ],
       },
       {
         id: "nonverbal-edit",
         title: "Nonverbal Edit",
-        subtitle: "Insert or remove laughs, breaths, sighs",
+        subtitle: "Insert or remove non-verbal events (breath, laugh, sigh, cough, …)",
         layout: "pair",
         samples: [
           {
-            id: "nonverbal-1",
+            id: "nv-breath-rm",
             lang: "zh",
-            label: "把语音里的换气声都去掉",
+            label: "Remove · breath",
             instruction: "把语音里的换气声都去掉",
-            audio: missing("nonverbal-1"),
+            audio: ph(),
           },
-          {
-            id: "nonverbal-2",
-            lang: "zh",
-            label: "在开头加一声笑",
-            instruction: "在开头加一声笑",
-            audio: missing("nonverbal-2"),
-          },
+          { id: "nv-laugh-add", lang: "zh", label: "Insert · laugh", instruction: "在开头加一声笑", audio: ph() },
+          { id: "nv-sigh-add", lang: "zh", label: "Insert · sigh", instruction: "在结尾加一声叹气", audio: ph() },
+          { id: "nv-cough-rm", lang: "zh", label: "Remove · cough", instruction: "把咳嗽声去掉", audio: ph() },
+          { id: "nv-um-rm", lang: "zh", label: "Remove · um", instruction: "把“嗯”去掉", audio: ph() },
+          { id: "nv-cry-add", lang: "en", label: "Insert · cry", instruction: "<instruction>", audio: ph() },
+          { id: "nv-stammer-rm", lang: "en", label: "Remove · stammer", instruction: "<instruction>", audio: ph() },
+          { id: "nv-yeah-add", lang: "en", label: "Insert · yeah", instruction: "<instruction>", audio: ph() },
         ],
       },
       {
         id: "whisper-edit",
         title: "Whisper Edit",
-        subtitle: "Whisper ↔ normal delivery",
+        subtitle: "Transform between normal speech and whispered speech",
         layout: "pair",
         samples: [
           {
-            id: "whisper-1",
+            id: "whisper-to-normal-1",
             lang: "zh",
-            label: "把这段耳语转换成正常说话的声音",
+            label: "Whisper → Normal · Mandarin",
             instruction: "把这段耳语转换成正常说话的声音",
             audio: {
               src: "assets/audio/whisper-source.wav",
               out: "assets/audio/whisper-output.wav",
             },
           },
-          {
-            id: "whisper-2",
-            lang: "zh",
-            label: "把这段话转换成耳语",
-            instruction: "把这段话转换成耳语",
-            audio: missing("whisper-2"),
-          },
+          { id: "whisper-to-normal-2", lang: "zh", label: "Whisper → Normal · Mandarin", instruction: "<instruction>", audio: ph() },
+          { id: "normal-to-whisper-1", lang: "zh", label: "Normal → Whisper · Mandarin", instruction: "把这段话转换成耳语", audio: ph() },
+          { id: "normal-to-whisper-2", lang: "en", label: "Normal → Whisper · English", instruction: "<instruction>", audio: ph() },
         ],
       },
       {
         id: "accent-edit",
         title: "Accent Edit",
-        subtitle: "De-accent to standard pronunciation",
+        subtitle: "De-accent to standard Mandarin · covers the supported dialect set",
         layout: "pair",
         samples: [
           {
             id: "accent-1",
             lang: "zh",
-            label: "把这段话的方言口音去掉，说得标准点",
+            label: "Accent Edit · Mandarin",
             instruction: "把这段话的方言口音去掉，说得标准点",
             audio: {
               src: "assets/audio/deaccent-source.wav",
               out: "assets/audio/deaccent-output.wav",
             },
           },
-          {
-            id: "accent-2",
-            lang: "zh",
-            label: "Another dialect to standard Mandarin",
-            instruction: "<instruction>",
-            audio: missing("accent-2"),
-          },
+          { id: "accent-zh-2", lang: "zh", label: "Dialect → Standard", instruction: "<instruction>", audio: ph() },
+          { id: "accent-zh-3", lang: "zh", label: "Dialect → Standard", instruction: "<instruction>", audio: ph() },
+          { id: "accent-zh-4", lang: "zh", label: "Dialect → Standard", instruction: "<instruction>", audio: ph() },
+          { id: "accent-en-1", lang: "en", label: "Accent Edit · English", instruction: "<instruction>", audio: ph() },
+          { id: "accent-en-2", lang: "en", label: "Accent Edit · English", instruction: "<instruction>", audio: ph() },
+          { id: "accent-en-3", lang: "en", label: "Accent Edit · English", instruction: "<instruction>", audio: ph() },
         ],
       },
     ],
@@ -411,108 +555,109 @@ export const capabilities: CapabilityFamily[] = [
     id: "acoustic-editing",
     name: "Acoustic Editing",
     tagline: "Fine-grained control of rate, pitch, and loudness",
-    intro:
-      "Auk adjusts the low-level speaking attributes — speed, volume, and pitch — while preserving the linguistic content and speaker identity.",
+    intro: "Auk adjusts the low-level speaking attributes — speed, volume, and pitch — while preserving the linguistic content and speaker identity. Each control is one source + several outputs on a slider.",
     groups: [
       {
         id: "speed-edit",
         title: "Speed Edit",
-        subtitle: "Faster / slower speaking rate",
-        layout: "multi",
+        subtitle: "Slide through every supported rate multiplier",
+        layout: "slider",
         samples: [
-          {
-            id: "speed-source-1",
-            lang: "zh",
-            label: "Source (1.0×)",
-            audio: { src: "assets/audio/acoustic-source.wav" },
-          },
           {
             id: "speed-1",
             lang: "zh",
-            label: "说太快了，慢一点",
+            label: "Speed Edit",
             instruction: "说太快了，慢一点",
-            audio: { out: "assets/audio/rate-1_5x-output.wav" },
+            audio: {
+              src: "assets/audio/acoustic-source.wav",
+              outs: [
+                { label: "0.5×", url: "assets/audio/rate-0_5x-output.wav" },
+                { label: "0.75×", url: "assets/audio/rate-0_75x-output.wav" },
+                { label: "1.0× (source)", url: "assets/audio/acoustic-source.wav" },
+                { label: "1.25×", url: "assets/audio/rate-1_25x-output.wav" },
+                { label: "1.5×", url: "assets/audio/rate-1_5x-output.wav" },
+                { label: "2.0×", url: "assets/audio/rate-2_0x-output.wav" },
+              ],
+            },
           },
           {
             id: "speed-2",
             lang: "zh",
-            label: "说得更快一点",
+            label: "Speed Edit",
             instruction: "<instruction>",
-            audio: missing("speed-2"),
+            audio: ph(),
           },
         ],
       },
       {
         id: "volume-edit",
         title: "Volume Edit",
-        subtitle: "Louder / softer",
-        layout: "multi",
+        subtitle: "Slide through every supported loudness offset",
+        layout: "slider",
         samples: [
-          {
-            id: "volume-source-1",
-            lang: "zh",
-            label: "Source",
-            audio: { src: "assets/audio/acoustic-source.wav" },
-          },
           {
             id: "volume-1",
             lang: "zh",
-            label: "声音大一点",
+            label: "Volume Edit",
             instruction: "声音大一点",
-            audio: { out: "assets/audio/loudness-minus-15db-output.wav" },
+            audio: {
+              src: "assets/audio/acoustic-source.wav",
+              outs: [
+                { label: "−15 dB", url: "assets/audio/loudness-minus-15db-output.wav" },
+                { label: "−10 dB", url: "assets/audio/loudness-minus-10db-output.wav" },
+                { label: "−5 dB", url: "assets/audio/loudness-minus-5db-output.wav" },
+                { label: "0 dB (source)", url: "assets/audio/acoustic-source.wav" },
+                { label: "+5 dB", url: "assets/audio/loudness-plus-5db-output.wav" },
+                { label: "+10 dB", url: "assets/audio/loudness-plus-10db-output.wav" },
+                { label: "+15 dB", url: "assets/audio/loudness-plus-15db-output.wav" },
+              ],
+            },
           },
           {
             id: "volume-2",
             lang: "zh",
-            label: "声音小一点",
+            label: "Volume Edit",
             instruction: "<instruction>",
-            audio: missing("volume-2"),
+            audio: ph(),
           },
         ],
       },
       {
         id: "pitch-edit",
         title: "Pitch Edit",
-        subtitle: "Higher / lower pitch",
-        layout: "multi",
+        subtitle: "Slide through every supported pitch shift",
+        layout: "slider",
         samples: [
-          {
-            id: "pitch-source-1",
-            lang: "zh",
-            label: "Source",
-            audio: { src: "assets/audio/acoustic-source.wav" },
-          },
           {
             id: "pitch-1",
             lang: "zh",
-            label: "声音再低沉一点",
+            label: "Pitch Edit",
             instruction: "声音再低沉一点",
-            audio: { out: "assets/audio/pitch-plus-2-output.wav" },
+            audio: {
+              src: "assets/audio/acoustic-source.wav",
+              outs: [
+                { label: "−3 semi", url: "assets/audio/pitch-minus-3-output.wav" },
+                { label: "−2 semi", url: "assets/audio/pitch-minus-2-output.wav" },
+                { label: "−1 semi", url: "assets/audio/pitch-minus-1-output.wav" },
+                { label: "0 (source)", url: "assets/audio/acoustic-source.wav" },
+                { label: "+1 semi", url: "assets/audio/pitch-plus-1-output.wav" },
+                { label: "+2 semi", url: "assets/audio/pitch-plus-2-output.wav" },
+                { label: "+3 semi", url: "assets/audio/pitch-plus-3-output.wav" },
+              ],
+            },
           },
           {
             id: "pitch-2",
             lang: "zh",
-            label: "声音高一点",
+            label: "Pitch Edit",
             instruction: "<instruction>",
-            audio: missing("pitch-2"),
+            audio: ph(),
           },
         ],
       },
     ],
   },
 ];
-
-export const lyricEditPlaceholder: DemoSample = {
-  id: "vocal-edit-1",
-  lang: "zh",
-  label: "把这首歌里唱的“明天你好”改成“未来你好”",
-  instruction: "把这首歌里唱的“明天你好”改成“未来你好”",
-  transcript: "<source lyrics> → <target lyrics>",
-  audio: {
-    src: "assets/audio/lyric-edit-source.wav",
-    out: "assets/audio/lyric-edit-output.wav",
-  },
-};
 
 export interface FamilyChip {
   id: string;
@@ -528,7 +673,7 @@ export const headlineStats: { label: string; value: string; note?: string }[] = 
   { label: "Backbone parameters", value: "1.5B" },
   { label: "Hours of effective audio", value: "1.95M" },
   { label: "Instruction–audio instances", value: "3.03B" },
-  { label: "Unified task families", value: "5" },
+  { label: "Speech tasks", value: "15" },
   { label: "Auk-Flash sampling steps", value: "4", note: "4.5× speedup" },
 ];
 

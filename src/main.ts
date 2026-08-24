@@ -4,14 +4,12 @@ import {
   capabilities,
   familyChips,
   headlineStats,
-  lyricEditPlaceholder,
   resourceLinks,
   type CapabilityFamily,
   type DemoGroup,
   type DemoSample,
   type Placeholder,
 } from "./data/capabilities";
-import { benchmarkBlocks } from "./data/benchmarks";
 
 const isPlaceholder = (audio: DemoSample["audio"]): audio is Placeholder =>
   typeof audio === "object" && "missing" in audio;
@@ -62,72 +60,71 @@ function renderIcon(kind: string): string {
   }
 }
 
-function buildFamilyLegend(): void {
-  const ul = document.getElementById("family-legend");
-  if (!ul) return;
-  ul.innerHTML = familyChips
-    .map(
-      (c) =>
-        `<li><a href="#family-${escapeHtml(c.id)}">${escapeHtml(c.name)}</a><span>${escapeHtml(
-          capabilities.find((x) => x.id === c.id)?.tagline ?? "",
-        )}</span></li>`,
-    )
-    .join("");
-}
-
 function buildFamilyRail(): void {
   const rail = document.getElementById("family-rail");
   if (!rail) return;
   rail.innerHTML = familyChips
     .map(
-      (c) =>
-        `<a href="#family-${escapeHtml(c.id)}" data-rail="${escapeHtml(c.id)}">${escapeHtml(c.name)}</a>`,
+      (c, i) =>
+        `<a href="#family-${escapeHtml(c.id)}" data-rail="${escapeHtml(c.id)}" data-rail-active="${
+          i === 0 ? "1" : "0"
+        }">${escapeHtml(c.name)}</a>`,
     )
     .join("");
 
-  // Active section tracking
+  // Tab-style switch: clicking a rail chip hides other families and only
+  // shows the selected one. Sections are looked up lazily because the
+  // family markup may not have been rendered when this function runs.
   const links = Array.from(rail.querySelectorAll<HTMLAnchorElement>("a[data-rail]"));
-  const map = new Map(links.map((l) => [l.dataset.rail, l]));
-  const obs = new IntersectionObserver(
-    (entries) => {
-      entries.forEach((e) => {
-        if (e.isIntersecting) {
-          const id = (e.target as HTMLElement).id.replace(/^family-/, "");
-          map.forEach((l) => l.classList.toggle("is-active", l.dataset.rail === id));
-        }
-      });
-    },
-    { rootMargin: "-30% 0px -50% 0px", threshold: 0 },
-  );
-  capabilities.forEach((c) => {
-    const el = document.getElementById(`family-${c.id}`);
-    if (el) obs.observe(el);
+  let currentId: string | null = null;
+
+  const apply = (id: string | null) => {
+    currentId = id;
+    links.forEach((l) => {
+      const on = id === null || l.dataset.rail === id;
+      l.dataset.railActive = on ? "1" : "0";
+    });
+    capabilities.forEach((c) => {
+      const s = document.getElementById(`family-${c.id}`);
+      if (!s) return;
+      s.hidden = id !== null && c.id !== id;
+    });
+  };
+
+  links.forEach((l) => {
+    l.addEventListener("click", (e) => {
+      const id = l.dataset.rail!;
+      const next = currentId === id ? null : id;
+      e.preventDefault();
+      apply(next);
+      if (next) {
+        history.replaceState(null, "", `#family-${next}`);
+        const target = document.getElementById(`family-${next}`);
+        target?.scrollIntoView({ behavior: "smooth", block: "start" });
+      } else {
+        history.replaceState(null, "", "#demos");
+        document.getElementById("demos")?.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+    });
   });
+
+  // Honor deep links (e.g. #family-... in URL on first load).
+  const initial = window.location.hash.match(/family-([\w-]+)/)?.[1];
+  if (initial) {
+    setTimeout(() => apply(initial), 0);
+  }
 }
 
 function buildDemos(): void {
   const root = document.getElementById("demos-body");
   if (!root) return;
-  // Content editing family covers 12 of the 16 tasks. Lyric editing (Vocal
-  // Edit) is rendered as an additional group at the end of the content family.
-  const vocalGroup: DemoGroup = {
-    id: "vocal-edit",
-    title: "Vocal Edit",
-    subtitle: "Rewrite the lyrics of a sung passage",
-    layout: "pair",
-    samples: [lyricEditPlaceholder],
-  };
-  const families = capabilities.map((c) => ({ ...c, groups: [...c.groups] }));
-  const content = families.find((c) => c.id === "content-editing");
-  if (content) content.groups.push(vocalGroup);
-  root.innerHTML = families.map(renderFamily).join("\n");
+  root.innerHTML = capabilities.map(renderFamily).join("\n");
 }
 
 function renderFamily(c: CapabilityFamily): string {
   return `
     <section class="family-section" id="family-${c.id}">
       <div class="family-section__intro">
-        <p class="family-section__tagline">${escapeHtml(c.tagline)}</p>
         <h2 class="family-section__name">${escapeHtml(c.name)}</h2>
         <p class="family-section__lede">${escapeHtml(c.intro)}</p>
       </div>
@@ -149,98 +146,90 @@ function renderGroup(g: DemoGroup): string {
 }
 
 function renderSample(s: DemoSample): string {
-  const langPill = `<span class="lang-pill">${escapeHtml(s.lang)}</span>`;
-  const hint = s.hint ? `<p class="demo-card__hint">${escapeHtml(s.hint)}</p>` : "";
-  const transcript = s.transcript && !/^<.*>$/.test(s.transcript)
-    ? `<p class="demo-card__transcript">${escapeHtml(s.transcript)}</p>`
-    : "";
   if (isPlaceholder(s.audio)) {
     return `
       <article class="demo-card placeholder-card" data-sample-id="${escapeHtml(s.id)}">
-        <div class="demo-card__head">
-          <h4 class="demo-card__label">${escapeHtml(s.label)}</h4>
-          ${langPill}
+        <div class="demo-card__row demo-card__row--instruction">
+          <span class="demo-card__label">${escapeHtml(s.label)}</span>
+          <span class="lang-pill">${escapeHtml(s.lang)}</span>
         </div>
-        ${hint}
-        ${transcript}
+        <p class="demo-card__instruction placeholder">&lt;instruction&gt;</p>
         <p class="placeholder-text">${escapeHtml(s.audio.text)}</p>
       </article>
     `;
   }
-  const tracks = collectTracks(s);
-  const cfg = JSON.stringify({
-    tracks,
-    caption: s.label,
-    instruction: s.instruction,
-  }).replace(/'/g, "&#39;");
+  return renderReal(s);
+}
+
+function renderReal(s: DemoSample): string {
+  const audio = s.audio as { src?: string; out?: string; outs?: { label: string; url: string }[] };
+  if (audio.outs && audio.outs.length > 0 && audio.src) {
+    return renderSlider(s, audio.src, audio.outs);
+  }
+  return renderPair(s, audio.src, audio.out);
+}
+
+function renderPair(s: DemoSample, src?: string, out?: string): string {
+  const tracks: { url: string; label: string; side?: "a" | "b" }[] = [];
+  if (src) tracks.push({ url: src, label: "Input", side: "a" });
+  if (out) tracks.push({ url: out, label: "Output", side: "b" });
+  const cfg = JSON.stringify({ tracks, instruction: s.instruction }).replace(/'/g, "&#39;");
   return `
     <article class="demo-card" data-sample-id="${escapeHtml(s.id)}">
-      <div class="demo-card__head">
-        <h4 class="demo-card__label">${escapeHtml(s.label)}</h4>
-        ${langPill}
+      <div class="demo-card__row demo-card__row--instruction">
+        <span class="demo-card__label">${escapeHtml(s.label)}</span>
+        <span class="lang-pill">${escapeHtml(s.lang)}</span>
       </div>
-      ${hint}
+      <p class="demo-card__instruction">${escapeHtml(s.instruction)}</p>
       <div class="auk-player-mount" data-auk-player='${cfg}'></div>
     </article>
   `;
 }
 
-function collectTracks(s: DemoSample): { url: string; label: string; side?: "a" | "b" }[] {
-  const audio = s.audio as { src?: string; out?: string };
-  const tracks: { url: string; label: string; side?: "a" | "b" }[] = [];
-  if (audio.src) tracks.push({ url: audio.src, label: "Source", side: "a" });
-  if (audio.out) tracks.push({ url: audio.out, label: "Auk output", side: "b" });
-  if (tracks.length === 0) return [];
-  return tracks;
-}
-
-function buildSpotlight(): void {
-  // Spotlight headline numbers are intentionally omitted in v2 per design
-  // decision: the Evidence section shows the full benchmark tables only.
-  const root = document.getElementById("spotlight-grid");
-  if (root) root.remove();
-}
-
-function buildBenchmarkBlocks(): void {
-  const root = document.getElementById("benchmark-blocks");
-  if (!root) return;
-  root.innerHTML = benchmarkBlocks
-    .map((block) => {
-      const rows = block.systems
-        .map(
-          (sys) => `
-            <tr class="${sys.isOurs ? "is-ours" : ""}">
-              <td>${escapeHtml(sys.name)}</td>
-              ${sys.values
-                .map(
-                  (v) =>
-                    `<td>${escapeHtml(v.value)} <span class="placeholder" style="font-size:0.7em">${
-                      v.direction === "up" ? "↑" : "↓"
-                    }</span></td>`,
-                )
-                .join("")}
-            </tr>
-          `,
-        )
-        .join("");
-      return `
-        <div class="benchmark">
-          <div class="benchmark__head">
-            <h3 class="benchmark__title">${escapeHtml(block.title)}</h3>
-            <p class="benchmark__subtitle">${escapeHtml(block.subtitle)}</p>
-          </div>
-          <table>
-            <thead>
-              <tr>
-                ${block.headers.map((h) => `<th>${escapeHtml(h)}</th>`).join("")}
-              </tr>
-            </thead>
-            <tbody>${rows}</tbody>
-          </table>
-        </div>
-      `;
-    })
+function renderSlider(s: DemoSample, src: string, outs: { label: string; url: string }[]): string {
+  const stops = outs.map((o, i) => ({ idx: i, label: o.label, url: o.url }));
+  const defaultIdx = Math.max(0, stops.findIndex((x) => /source|0 dB|1\.0×|0\b/i.test(x.label)));
+  const resolvedIdx = defaultIdx >= 0 ? defaultIdx : 0;
+  const cfg = {
+    slider: {
+      stops,
+      defaultIdx: resolvedIdx,
+      instruction: s.instruction,
+    },
+  };
+  const cfgJson = JSON.stringify(cfg).replace(/'/g, "&#39;");
+  const stopsHtml = stops
+    .map(
+      (o, i) =>
+        `<button type="button" class="auk-slider__stop" data-idx="${i}" aria-pressed="${
+          i === resolvedIdx ? "true" : "false"
+        }"><span class="auk-slider__pip"></span><span class="auk-slider__label">${escapeHtml(
+          o.label,
+        )}</span></button>`,
+    )
     .join("");
+  const firstUrl = stops[resolvedIdx]?.url ?? src;
+  const firstLabel = stops[resolvedIdx]?.label ?? "Source";
+  const playerCfg = JSON.stringify({
+    tracks: [{ url: firstUrl, label: firstLabel }],
+    instruction: s.instruction,
+  }).replace(/'/g, "&#39;");
+  return `
+    <article class="demo-card" data-sample-id="${escapeHtml(s.id)}" data-slider>
+      <div class="demo-card__row demo-card__row--instruction">
+        <span class="demo-card__label">${escapeHtml(s.label)}</span>
+        <span class="lang-pill">${escapeHtml(s.lang)}</span>
+      </div>
+      <p class="demo-card__instruction">${escapeHtml(s.instruction)}</p>
+      <div class="auk-slider" data-auk-slider='${cfgJson}'>
+        <div class="auk-slider__track">
+          <div class="auk-slider__fill"></div>
+          ${stopsHtml}
+        </div>
+      </div>
+      <div class="auk-player-mount" data-auk-player='${playerCfg}'></div>
+    </article>
+  `;
 }
 
 function attachBibtexCopy(): void {
@@ -270,32 +259,71 @@ function attachBibtexCopy(): void {
   });
 }
 
+function attachSliderLogic(): void {
+  document.querySelectorAll<HTMLElement>(".auk-slider").forEach((slider) => {
+    let stops: { idx: number; label: string; url: string }[] = [];
+    let instruction: string | undefined;
+    try {
+      const parsed = JSON.parse(slider.dataset.aukSlider || "{}") as {
+        slider?: { stops?: { idx: number; label: string; url: string }[]; instruction?: string };
+      };
+      stops = parsed.slider?.stops ?? [];
+      instruction = parsed.slider?.instruction;
+    } catch {
+      return;
+    }
+    if (stops.length === 0) return;
+    const fill = slider.querySelector(".auk-slider__fill") as HTMLElement | null;
+    const buttons = Array.from(slider.querySelectorAll<HTMLButtonElement>(".auk-slider__stop"));
+    const card = slider.closest<HTMLElement>(".demo-card[data-slider]");
+    const mount = card?.querySelector<HTMLElement>(".auk-player-mount");
+
+    const setStop = (idx: number) => {
+      const stop = stops[idx];
+      if (!stop) return;
+      buttons.forEach((b, i) => b.setAttribute("aria-pressed", i === idx ? "true" : "false"));
+      const ratio = stops.length > 1 ? idx / (stops.length - 1) : 0;
+      if (fill) fill.style.width = `${ratio * 100}%`;
+      if (mount && card) {
+        const cfg = JSON.stringify({
+          tracks: [{ url: stop.url, label: stop.label }],
+          instruction,
+        }).replace(/'/g, "&#39;");
+        const fresh = document.createElement("div");
+        fresh.className = "auk-player-mount";
+        fresh.dataset.aukPlayer = cfg;
+        fresh.dataset.aukPlayerMounted = "";
+        mount.replaceWith(fresh);
+        import("./scripts/audio-player").then((m) => {
+          (m as { mountAllAudioPlayers: () => void }).mountAllAudioPlayers();
+        });
+      }
+    };
+
+    buttons.forEach((b) => {
+      b.addEventListener("click", () => {
+        const idx = +(b.dataset.idx ?? "0");
+        setStop(idx);
+      });
+    });
+  });
+}
+
 function ensurePlaceholderTokens(): void {
-  // Assertion: every place on the rendered page preserves the exact placeholder
-  // syntax `[audio|<instruction><reference audio description>]` and `<...>`.
   const text = document.body.textContent ?? "";
-  const okPh =
-    text.includes("<instruction>") ||
-    text.includes("<target text>") ||
-    text.includes("<caption>") ||
-    text.includes("<abstract>") ||
-    text.includes("<authors>") ||
-    text.includes("<reference audio description>");
   const okAudio = text.includes("[audio|<instruction><reference audio description>]");
-  if (!okPh && !okAudio) {
-    console.warn("Auk demo page: no placeholders detected.");
+  if (!okAudio) {
+    console.warn("Auk demo page: placeholder syntax not detected.");
   }
 }
 
 function init(): void {
   buildStatsList();
   buildResourceLinks();
-  buildFamilyLegend();
   buildFamilyRail();
   buildDemos();
-  buildSpotlight();
-  buildBenchmarkBlocks();
   attachBibtexCopy();
+  attachSliderLogic();
   mountAllAudioPlayers();
   ensurePlaceholderTokens();
   window.addEventListener("resize", redrawAllPlayers);
