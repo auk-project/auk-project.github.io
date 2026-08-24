@@ -358,13 +358,14 @@ button {
 }
 
 /* ============ Capability atlas ============= */
-.atlas-figure {
-  margin: 0;
+/* Capability figure placed under the abstract logos */
+.abstract-figure {
+  margin: 1.5rem auto 0;
   text-align: center;
 }
-.atlas-figure img {
+.abstract-figure img {
   width: 100%;
-  max-width: 1100px;
+  max-width: 720px;
   margin: 0 auto;
   border-radius: var(--radius-md);
   border: 1px solid var(--rule);
@@ -377,9 +378,10 @@ button {
   text-align: left;
 }
 /* Show only the left half of the architecture figure.
-   Source image is 4842x2125. We want the left half only, which is
-   2421x2125 (aspect ratio ~1.139). The viewport matches that aspect ratio;
-   the image is rendered at 2x viewport width and clipped to its left half. */
+   Source image is 4842x2125. Left half is 2421x2125 (aspect ratio ~1.139).
+   The viewport matches that aspect ratio; the image is rendered at 2x
+   viewport width (slightly oversized to avoid sub-pixel white seams at the
+   right clipping edge) and pinned to the left. */
 .arch-figure--left {
   text-align: left;
 }
@@ -392,12 +394,46 @@ button {
   border: 1px solid var(--rule);
   box-shadow: var(--shadow-card);
   aspect-ratio: 2421 / 2125;
+  background: var(--bg-card);
 }
 .arch-figure--left img {
   position: absolute;
   left: 0;
   top: 0;
-  width: 200%;
+  width: calc(200% + 2px);
+  max-width: none;
+  height: 100%;
+  display: block;
+}
+
+.arch-figure--sunburst figcaption {
+  margin: 1rem auto 0 !important;
+  text-align: center !important;
+  max-width: 80ch;
+}
+.arch-figure--sunburst figcaption strong {
+  color: var(--ink);
+  font-weight: 600;
+}
+.arch-figure--left {
+  text-align: left;
+}
+.arch-figure--left .arch-figure__viewport {
+  position: relative;
+  width: 100%;
+  max-width: 640px;
+  overflow: hidden;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--rule);
+  box-shadow: var(--shadow-card);
+  aspect-ratio: 2421 / 2125;
+  background: var(--bg-card);
+}
+.arch-figure--left img {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: calc(200% + 2px);
   max-width: none;
   height: 100%;
   display: block;
@@ -445,7 +481,7 @@ button {
 /* ============ Capability bar (single sticky nav) ============= */
 .demos {
   background: linear-gradient(180deg, rgba(0, 165, 195, 0.03), transparent 30%);
-  padding: 2.5rem 0 3rem;
+  padding: 0.75rem 0 3rem;
   border-top: 1px solid var(--rule);
 }
 
@@ -500,7 +536,7 @@ button {
   display: none;
 }
 .family-section__intro {
-  margin-bottom: 1.25rem;
+  margin-bottom: 0.75rem;
   text-align: left;
 }
 .family-section__name {
@@ -911,9 +947,6 @@ button {
   gap: 1.1rem;
   flex-wrap: wrap;
   justify-content: center;
-}
-.footer__brand img[alt="Tencent Hunyuan"] {
-  max-height: 30px;
 }
 .footer__brand img {
   max-height: 36px;
