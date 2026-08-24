@@ -187,7 +187,7 @@ button {
 }
 .section-lede {
   color: var(--ink-soft);
-  max-width: 60ch;
+  max-width: 100%;
   margin: 0 auto 2rem;
   font-size: 1.05rem;
 }
@@ -209,7 +209,7 @@ button {
   background: radial-gradient(circle at 15% 20%, rgba(0, 165, 195, 0.1), transparent 50%),
     radial-gradient(circle at 85% 80%, rgba(87, 79, 196, 0.08), transparent 50%),
     var(--bg);
-  padding: 3rem 0 3rem;
+  padding: 2rem 0 2rem;
   border-bottom: 1px solid var(--rule);
 }
 .hero.is-fullheight {
@@ -217,14 +217,14 @@ button {
 }
 .hero__inner {
   text-align: center;
-  padding: 2rem 0 1rem;
+  padding: 1rem 0 0.5rem;
 }
 .hero__lede {
   max-width: 920px;
-  margin: 1.25rem auto 1.5rem;
+  margin: 1rem auto 1rem;
   color: var(--ink-soft);
-  font-size: 0.95rem;
-  line-height: 1.6;
+  font-size: 0.9rem;
+  line-height: 1.55;
 }
 .hero__lede strong {
   color: var(--ink);
@@ -374,22 +374,24 @@ button {
 /* ============ Architecture ============= */
 .arch-figure {
   margin: 0 0 2.5rem;
-  text-align: center;
+  text-align: left;
 }
-/* Show only the left half of the architecture figure:
-   the image is 2× wider than the viewport and pinned to the left. */
+/* Show only the left half of the architecture figure.
+   Source image is 4842x2125. We want the left half only, which is
+   2421x2125 (aspect ratio ~1.139). The viewport matches that aspect ratio;
+   the image is rendered at 2x viewport width and clipped to its left half. */
 .arch-figure--left {
   text-align: left;
 }
 .arch-figure--left .arch-figure__viewport {
   position: relative;
   width: 100%;
-  max-width: 720px;
+  max-width: 640px;
   overflow: hidden;
   border-radius: var(--radius-md);
   border: 1px solid var(--rule);
   box-shadow: var(--shadow-card);
-  aspect-ratio: 4842 / 2125;
+  aspect-ratio: 2421 / 2125;
 }
 .arch-figure--left img {
   position: absolute;
@@ -398,20 +400,19 @@ button {
   width: 200%;
   max-width: none;
   height: 100%;
-  object-fit: cover;
-  object-position: left center;
   display: block;
 }
 .arch-figure figcaption {
-  margin: 0.75rem auto 0;
+  margin: 1rem 0 0;
   color: var(--ink-soft);
   font-size: 0.95rem;
-  max-width: 80ch;
+  max-width: 100%;
   text-align: left;
+  line-height: 1.6;
 }
 .arch-figure--left figcaption {
   margin-left: 0;
-  margin-right: auto;
+  margin-right: 0;
 }
 .arch-figure figcaption strong {
   color: var(--ink);
@@ -444,7 +445,7 @@ button {
 /* ============ Capability bar (single sticky nav) ============= */
 .demos {
   background: linear-gradient(180deg, rgba(0, 165, 195, 0.03), transparent 30%);
-  padding: 4rem 0 5rem;
+  padding: 2.5rem 0 3rem;
   border-top: 1px solid var(--rule);
 }
 
@@ -490,7 +491,7 @@ button {
 .demos__body {
   display: flex;
   flex-direction: column;
-  gap: 4rem;
+  gap: 2.5rem;
 }
 .family-section {
   scroll-margin-top: 150px;
@@ -499,7 +500,7 @@ button {
   display: none;
 }
 .family-section__intro {
-  margin-bottom: 2rem;
+  margin-bottom: 1.25rem;
   text-align: left;
 }
 .family-section__name {
@@ -516,30 +517,30 @@ button {
 }
 
 .demo-group {
-  margin: 2.5rem 0 0;
+  margin: 1.5rem 0 0;
 }
 .demo-group__head {
   display: flex;
   flex-direction: column;
   gap: 0.2rem;
-  margin-bottom: 1.25rem;
+  margin-bottom: 0.9rem;
 }
 .demo-group__title {
   font-family: var(--font-display);
-  font-size: 1.2rem;
+  font-size: 1.1rem;
   margin: 0;
   color: var(--ink);
 }
 .demo-group__subtitle {
   color: var(--ink-soft);
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   margin: 0;
 }
 
 .demo-list {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 1.25rem;
+  gap: 0.85rem;
 }
 @media (min-width: 900px) {
   .demo-list {
@@ -547,7 +548,10 @@ button {
   }
 }
 
-/* Unified single card: row 1 = instruction, row 2 = player */
+/* Unified single card.
+   Row 1: demo title + lang pill
+   Row 2: Instruction: ...
+   Row 3: audio player (no border, blends with the card) */
 .demo-card {
   background: var(--bg-card);
   border: 1px solid var(--rule);
@@ -555,15 +559,26 @@ button {
   padding: 1rem 1.2rem 1.2rem;
   display: flex;
   flex-direction: column;
-  gap: 0.9rem;
+  gap: 0.75rem;
   box-shadow: 0 2px 12px rgba(16, 36, 45, 0.04);
 }
-.demo-card__row--instruction {
+.demo-card__head {
   display: flex;
   align-items: center;
   gap: 0.6rem;
   flex-wrap: nowrap;
-  min-height: 1.5em;
+  min-height: 1.4em;
+}
+.demo-card__title {
+  font-family: var(--font-mono);
+  font-size: 0.88rem;
+  font-weight: 500;
+  color: var(--accent-deep);
+  letter-spacing: 0.01em;
+  flex: 1 1 auto;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .demo-card__instruction {
   margin: 0;
@@ -571,9 +586,12 @@ button {
   color: var(--ink);
   font-size: 0.9rem;
   line-height: 1.55;
-  font-weight: 500;
   word-break: break-word;
-  flex: 1 1 auto;
+}
+.demo-card__instruction-label {
+  color: var(--accent-deep);
+  font-weight: 600;
+  margin-right: 0.35em;
 }
 .lang-pill {
   font-family: var(--font-mono);
@@ -608,16 +626,13 @@ button {
   margin: 0;
 }
 
-/* ============ Audio player ============= */
+/* ============ Audio player (no border, blends into the card) ============= */
 .auk-player {
-  background: var(--bg-elev);
-  border: 1px solid var(--rule);
-  border-radius: var(--radius-md);
-  padding: 0.9rem 1rem;
   display: flex;
   flex-direction: column;
-  gap: 0.6rem;
+  gap: 0.5rem;
   position: relative;
+  padding: 0;
 }
 .auk-player__tracks {
   display: none;
@@ -728,19 +743,27 @@ button {
   min-height: 1em;
 }
 
-/* ============ Slider (rate / volume / pitch) — draggable ============= */
+/* ============ Slider — pill wrap, labels above the rail ============= */
 .auk-slider {
   position: relative;
-  margin: 0.75rem 0 0.5rem;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: stretch;
+  width: 100%;
+  background: var(--bg-soft);
+  border-radius: 9999px;
+  padding: 0.7rem 1rem 1rem;
+  border: 1px solid var(--rule);
 }
 .auk-slider__rail {
   position: relative;
-  height: 40px;
+  height: 18px;
   display: flex;
   align-items: center;
   cursor: grab;
   touch-action: none;
   user-select: none;
+  margin-top: 0.35rem;
 }
 .auk-slider__rail:active {
   cursor: grabbing;
@@ -774,35 +797,32 @@ button {
 .auk-slider__thumb {
   position: absolute;
   top: 50%;
-  width: 22px;
-  height: 22px;
+  width: 18px;
+  height: 18px;
   border-radius: 50%;
-  background: #fff;
-  border: 3px solid var(--accent-deep);
-  box-shadow: 0 2px 6px rgba(16, 36, 45, 0.25);
+  background: var(--accent-2);
+  border: 3px solid #fff;
+  box-shadow: 0 2px 6px rgba(16, 36, 45, 0.3);
   transform: translate(-50%, -50%);
   pointer-events: none;
 }
 .auk-slider__labels {
-  position: absolute;
-  inset: 0;
   display: flex;
   justify-content: space-between;
-  pointer-events: none;
+  align-items: center;
+  margin-bottom: 0.05rem;
 }
 .auk-slider__stop {
-  position: relative;
-  z-index: 1;
   background: transparent;
   border: 0;
-  padding: 0.2rem 0.1rem;
-  display: flex;
+  padding: 0.1rem 0.15rem;
+  display: inline-flex;
   align-items: center;
   color: var(--ink-soft);
   font-family: var(--font-mono);
-  font-size: 0.72rem;
+  font-size: 0.7rem;
   cursor: pointer;
-  pointer-events: auto;
+  white-space: nowrap;
 }
 .auk-slider__stop[aria-pressed="true"] {
   color: var(--accent-deep);

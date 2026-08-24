@@ -130,13 +130,6 @@ export class AudioPlayer {
       });
       this.root.appendChild(this.abSwitch);
     }
-
-    if (this.opts.instruction && !/^<.*>$/.test(this.opts.instruction)) {
-      const ins = document.createElement("div");
-      ins.className = "auk-player__instruction";
-      ins.textContent = this.opts.instruction;
-      this.root.appendChild(ins);
-    }
   }
 
   private createChannel(track: PlayerTrack, autoload: boolean): ChannelState {

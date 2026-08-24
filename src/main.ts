@@ -150,10 +150,11 @@ function renderSample(s: DemoSample): string {
     const langPill = s.lang !== "instrumental" ? `<span class="lang-pill">${escapeHtml(s.lang)}</span>` : "";
     return `
       <article class="demo-card placeholder-card" data-sample-id="${escapeHtml(s.id)}">
-        <div class="demo-card__row demo-card__row--instruction">
-          <p class="demo-card__instruction">${escapeHtml(s.instruction)}</p>
+        <div class="demo-card__head">
+          <span class="demo-card__title">${escapeHtml(s.label)}</span>
           ${langPill}
         </div>
+        <p class="demo-card__instruction"><span class="demo-card__instruction-label">Instruction:</span> ${escapeHtml(s.instruction)}</p>
         <p class="placeholder-text">${escapeHtml(s.audio.text)}</p>
       </article>
     `;
@@ -173,14 +174,15 @@ function renderPair(s: DemoSample, src?: string, out?: string): string {
   const tracks: { url: string; label: string; side?: "a" | "b" }[] = [];
   if (src) tracks.push({ url: src, label: "Input", side: "a" });
   if (out) tracks.push({ url: out, label: "Output", side: "b" });
-  const cfg = JSON.stringify({ tracks, instruction: s.instruction }).replace(/'/g, "&#39;");
+  const cfg = JSON.stringify({ tracks }).replace(/'/g, "&#39;");
   const langPill = s.lang !== "instrumental" ? `<span class="lang-pill">${escapeHtml(s.lang)}</span>` : "";
   return `
     <article class="demo-card" data-sample-id="${escapeHtml(s.id)}">
-      <div class="demo-card__row demo-card__row--instruction">
-        <p class="demo-card__instruction">${escapeHtml(s.instruction)}</p>
+      <div class="demo-card__head">
+        <span class="demo-card__title">${escapeHtml(s.label)}</span>
         ${langPill}
       </div>
+      <p class="demo-card__instruction"><span class="demo-card__instruction-label">Instruction:</span> ${escapeHtml(s.instruction)}</p>
       <div class="auk-player-mount" data-auk-player='${cfg}'></div>
     </article>
   `;
@@ -194,7 +196,6 @@ function renderSlider(s: DemoSample, src: string, outs: { label: string; url: st
     slider: {
       stops,
       defaultIdx: resolvedIdx,
-      instruction: s.instruction,
     },
   };
   const cfgJson = JSON.stringify(cfg).replace(/'/g, "&#39;");
@@ -210,21 +211,19 @@ function renderSlider(s: DemoSample, src: string, outs: { label: string; url: st
   const firstLabel = stops[resolvedIdx]?.label ?? "Source";
   const playerCfg = JSON.stringify({
     tracks: [{ url: firstUrl, label: firstLabel }],
-    instruction: s.instruction,
   }).replace(/'/g, "&#39;");
   return `
     <article class="demo-card" data-sample-id="${escapeHtml(s.id)}" data-slider>
-      <div class="demo-card__row demo-card__row--instruction">
-        <p class="demo-card__instruction">${escapeHtml(s.instruction)}</p>
+      <div class="demo-card__head">
+        <span class="demo-card__title">${escapeHtml(s.label)}</span>
         <span class="lang-pill">${escapeHtml(s.lang)}</span>
       </div>
+      <p class="demo-card__instruction"><span class="demo-card__instruction-label">Instruction:</span> ${escapeHtml(s.instruction)}</p>
       <div class="auk-slider" data-auk-slider='${cfgJson}'>
         <div class="auk-slider__rail" role="slider" tabindex="0" aria-label="${escapeHtml(s.instruction)} — drag to change the output" aria-valuemin="0" aria-valuemax="${stops.length - 1}" aria-valuenow="${resolvedIdx}">
+          <div class="auk-slider__labels">${stopsHtml}</div>
           <div class="auk-slider__fill"></div>
           <div class="auk-slider__thumb" style="left: ${(resolvedIdx / (stops.length - 1)) * 100}%"></div>
-          <div class="auk-slider__labels">
-            ${stopsHtml}
-          </div>
         </div>
       </div>
       <div class="auk-player-mount" data-auk-player='${playerCfg}'></div>
@@ -262,13 +261,11 @@ function attachBibtexCopy(): void {
 function attachSliderLogic(): void {
   document.querySelectorAll<HTMLElement>(".auk-slider").forEach((slider) => {
     let stops: { idx: number; label: string; url: string }[] = [];
-    let instruction: string | undefined;
     try {
       const parsed = JSON.parse(slider.dataset.aukSlider || "{}") as {
-        slider?: { stops?: { idx: number; label: string; url: string }[]; instruction?: string };
+        slider?: { stops?: { idx: number; label: string; url: string }[] };
       };
       stops = parsed.slider?.stops ?? [];
-      instruction = parsed.slider?.instruction;
     } catch {
       return;
     }
@@ -285,7 +282,6 @@ function attachSliderLogic(): void {
       if (!stop || !mount || !card) return;
       const cfg = JSON.stringify({
         tracks: [{ url: stop.url, label: stop.label }],
-        instruction,
       }).replace(/'/g, "&#39;");
       const fresh = document.createElement("div");
       fresh.className = "auk-player-mount";
