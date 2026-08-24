@@ -205,19 +205,19 @@ button {
 /* ============ Hero ============= */
 .hero {
   position: relative;
-  min-height: 92vh;
+  min-height: auto;
   background: radial-gradient(circle at 15% 20%, rgba(0, 165, 195, 0.1), transparent 50%),
     radial-gradient(circle at 85% 80%, rgba(87, 79, 196, 0.08), transparent 50%),
     var(--bg);
-  padding: 2rem 0 3rem;
+  padding: 3rem 0 3rem;
   border-bottom: 1px solid var(--rule);
 }
 .hero.is-fullheight {
-  min-height: 100vh;
+  min-height: auto;
 }
 .hero__inner {
   text-align: center;
-  padding: 3rem 0 1rem;
+  padding: 2rem 0 1rem;
 }
 .hero__lede {
   max-width: 920px;
@@ -345,7 +345,7 @@ button {
   margin-top: 2rem;
 }
 .affiliation-row img {
-  max-height: 70px;
+  max-height: 56px;
   width: auto;
   opacity: 0.92;
 }
@@ -353,7 +353,7 @@ button {
   max-height: 34px;
 }
 .affiliation-row img[alt="Shanghai Innovation Institution"] {
-  max-height: 90px;
+  max-height: 56px;
   border-radius: 50%;
 }
 
@@ -376,13 +376,31 @@ button {
   margin: 0 0 2.5rem;
   text-align: center;
 }
-.arch-figure--left img {
-  width: 60%;
+/* Show only the left half of the architecture figure:
+   the image is 2× wider than the viewport and pinned to the left. */
+.arch-figure--left {
+  text-align: left;
+}
+.arch-figure--left .arch-figure__viewport {
+  position: relative;
+  width: 100%;
   max-width: 720px;
-  margin: 0 auto 0 0;
+  overflow: hidden;
   border-radius: var(--radius-md);
   border: 1px solid var(--rule);
   box-shadow: var(--shadow-card);
+  aspect-ratio: 4842 / 2125;
+}
+.arch-figure--left img {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 200%;
+  max-width: none;
+  height: 100%;
+  object-fit: cover;
+  object-position: left center;
+  display: block;
 }
 .arch-figure figcaption {
   margin: 0.75rem auto 0;
@@ -537,7 +555,7 @@ button {
   padding: 1rem 1.2rem 1.2rem;
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
+  gap: 0.9rem;
   box-shadow: 0 2px 12px rgba(16, 36, 45, 0.04);
 }
 .demo-card__row--instruction {
@@ -551,8 +569,8 @@ button {
   margin: 0;
   font-family: var(--font-mono);
   color: var(--ink);
-  font-size: 1rem;
-  line-height: 1.5;
+  font-size: 0.9rem;
+  line-height: 1.55;
   font-weight: 500;
   word-break: break-word;
   flex: 1 1 auto;
@@ -878,11 +896,11 @@ button {
   max-height: 30px;
 }
 .footer__brand img {
-  max-height: 40px;
+  max-height: 36px;
   opacity: 0.88;
 }
 .footer__brand img[alt="Shanghai Innovation Institution"] {
-  max-height: 52px;
+  max-height: 40px;
   border-radius: 50%;
 }
 .footer__brand span {
@@ -917,14 +935,14 @@ button {
   .demo-list {
     grid-template-columns: 1fr;
   }
-  .arch-figure--left img {
-    width: 100%;
+  .arch-figure--left .arch-figure__viewport {
+    max-width: 100%;
   }
   .affiliation-row img {
     max-height: 56px;
   }
   .affiliation-row img[alt="Shanghai Innovation Institution"] {
-    max-height: 72px;
+    max-height: 64px;
   }
 }
 
