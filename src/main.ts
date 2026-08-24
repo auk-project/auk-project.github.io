@@ -147,13 +147,13 @@ function renderGroup(g: DemoGroup): string {
 
 function renderSample(s: DemoSample): string {
   if (isPlaceholder(s.audio)) {
+    const langPill = s.lang !== "instrumental" ? `<span class="lang-pill">${escapeHtml(s.lang)}</span>` : "";
     return `
       <article class="demo-card placeholder-card" data-sample-id="${escapeHtml(s.id)}">
         <div class="demo-card__row demo-card__row--instruction">
-          <span class="demo-card__label">${escapeHtml(s.label)}</span>
-          <span class="lang-pill">${escapeHtml(s.lang)}</span>
+          <p class="demo-card__instruction">${escapeHtml(s.instruction)}</p>
+          ${langPill}
         </div>
-        <p class="demo-card__instruction placeholder">&lt;instruction&gt;</p>
         <p class="placeholder-text">${escapeHtml(s.audio.text)}</p>
       </article>
     `;
@@ -174,13 +174,13 @@ function renderPair(s: DemoSample, src?: string, out?: string): string {
   if (src) tracks.push({ url: src, label: "Input", side: "a" });
   if (out) tracks.push({ url: out, label: "Output", side: "b" });
   const cfg = JSON.stringify({ tracks, instruction: s.instruction }).replace(/'/g, "&#39;");
+  const langPill = s.lang !== "instrumental" ? `<span class="lang-pill">${escapeHtml(s.lang)}</span>` : "";
   return `
     <article class="demo-card" data-sample-id="${escapeHtml(s.id)}">
       <div class="demo-card__row demo-card__row--instruction">
-        <span class="demo-card__label">${escapeHtml(s.label)}</span>
-        <span class="lang-pill">${escapeHtml(s.lang)}</span>
+        <p class="demo-card__instruction">${escapeHtml(s.instruction)}</p>
+        ${langPill}
       </div>
-      <p class="demo-card__instruction">${escapeHtml(s.instruction)}</p>
       <div class="auk-player-mount" data-auk-player='${cfg}'></div>
     </article>
   `;
@@ -203,9 +203,7 @@ function renderSlider(s: DemoSample, src: string, outs: { label: string; url: st
       (o, i) =>
         `<button type="button" class="auk-slider__stop" data-idx="${i}" aria-pressed="${
           i === resolvedIdx ? "true" : "false"
-        }"><span class="auk-slider__pip"></span><span class="auk-slider__label">${escapeHtml(
-          o.label,
-        )}</span></button>`,
+        }"><span class="auk-slider__label">${escapeHtml(o.label)}</span></button>`,
     )
     .join("");
   const firstUrl = stops[resolvedIdx]?.url ?? src;
@@ -217,14 +215,16 @@ function renderSlider(s: DemoSample, src: string, outs: { label: string; url: st
   return `
     <article class="demo-card" data-sample-id="${escapeHtml(s.id)}" data-slider>
       <div class="demo-card__row demo-card__row--instruction">
-        <span class="demo-card__label">${escapeHtml(s.label)}</span>
+        <p class="demo-card__instruction">${escapeHtml(s.instruction)}</p>
         <span class="lang-pill">${escapeHtml(s.lang)}</span>
       </div>
-      <p class="demo-card__instruction">${escapeHtml(s.instruction)}</p>
       <div class="auk-slider" data-auk-slider='${cfgJson}'>
-        <div class="auk-slider__track">
+        <div class="auk-slider__rail" role="slider" tabindex="0" aria-label="${escapeHtml(s.instruction)} — drag to change the output" aria-valuemin="0" aria-valuemax="${stops.length - 1}" aria-valuenow="${resolvedIdx}">
           <div class="auk-slider__fill"></div>
-          ${stopsHtml}
+          <div class="auk-slider__thumb" style="left: ${(resolvedIdx / (stops.length - 1)) * 100}%"></div>
+          <div class="auk-slider__labels">
+            ${stopsHtml}
+          </div>
         </div>
       </div>
       <div class="auk-player-mount" data-auk-player='${playerCfg}'></div>
@@ -273,40 +273,91 @@ function attachSliderLogic(): void {
       return;
     }
     if (stops.length === 0) return;
-    const fill = slider.querySelector(".auk-slider__fill") as HTMLElement | null;
-    const buttons = Array.from(slider.querySelectorAll<HTMLButtonElement>(".auk-slider__stop"));
+    const rail = slider.querySelector<HTMLElement>(".auk-slider__rail");
+    const fill = slider.querySelector<HTMLElement>(".auk-slider__fill");
+    const thumb = slider.querySelector<HTMLElement>(".auk-slider__thumb");
     const card = slider.closest<HTMLElement>(".demo-card[data-slider]");
     const mount = card?.querySelector<HTMLElement>(".auk-player-mount");
+    let currentIdx = 0;
 
-    const setStop = (idx: number) => {
+    const rebuildPlayer = (idx: number) => {
       const stop = stops[idx];
-      if (!stop) return;
-      buttons.forEach((b, i) => b.setAttribute("aria-pressed", i === idx ? "true" : "false"));
-      const ratio = stops.length > 1 ? idx / (stops.length - 1) : 0;
-      if (fill) fill.style.width = `${ratio * 100}%`;
-      if (mount && card) {
-        const cfg = JSON.stringify({
-          tracks: [{ url: stop.url, label: stop.label }],
-          instruction,
-        }).replace(/'/g, "&#39;");
-        const fresh = document.createElement("div");
-        fresh.className = "auk-player-mount";
-        fresh.dataset.aukPlayer = cfg;
-        fresh.dataset.aukPlayerMounted = "";
-        mount.replaceWith(fresh);
-        import("./scripts/audio-player").then((m) => {
-          (m as { mountAllAudioPlayers: () => void }).mountAllAudioPlayers();
-        });
-      }
+      if (!stop || !mount || !card) return;
+      const cfg = JSON.stringify({
+        tracks: [{ url: stop.url, label: stop.label }],
+        instruction,
+      }).replace(/'/g, "&#39;");
+      const fresh = document.createElement("div");
+      fresh.className = "auk-player-mount";
+      fresh.dataset.aukPlayer = cfg;
+      fresh.dataset.aukPlayerMounted = "";
+      mount.replaceWith(fresh);
+      import("./scripts/audio-player").then((m) => {
+        (m as { mountAllAudioPlayers: () => void }).mountAllAudioPlayers();
+      });
     };
 
-    buttons.forEach((b) => {
-      b.addEventListener("click", () => {
-        const idx = +(b.dataset.idx ?? "0");
-        setStop(idx);
+    const render = (idx: number) => {
+      currentIdx = idx;
+      const ratio = stops.length > 1 ? idx / (stops.length - 1) : 0;
+      if (fill) fill.style.width = `${ratio * 100}%`;
+      if (thumb) thumb.style.left = `${ratio * 100}%`;
+      if (rail) rail.setAttribute("aria-valuenow", String(idx));
+      slider.querySelectorAll<HTMLButtonElement>(".auk-slider__stop").forEach((b, i) => {
+        b.setAttribute("aria-pressed", i === idx ? "true" : "false");
       });
+    };
+
+    const idxFromEvent = (clientX: number): number => {
+      const rect = rail?.getBoundingClientRect();
+      if (!rect || rect.width === 0) return 0;
+      const ratio = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width));
+      return Math.round(ratio * (stops.length - 1));
+    };
+
+    const apply = (clientX: number, commit: boolean) => {
+      const idx = idxFromEvent(clientX);
+      render(idx);
+      if (commit) rebuildPlayer(idx);
+    };
+
+    let dragging = false;
+    rail?.addEventListener("pointerdown", (e) => {
+      dragging = true;
+      rail.setPointerCapture(e.pointerId);
+      apply(e.clientX, false);
     });
+    rail?.addEventListener("pointermove", (e) => {
+      if (!dragging) return;
+      apply(e.clientX, false);
+    });
+    const endDrag = (e: PointerEvent) => {
+      if (!dragging) return;
+      dragging = false;
+      if (rail) rail.releasePointerCapture(e.pointerId);
+      apply(e.clientX, true);
+    };
+    rail?.addEventListener("pointerup", endDrag);
+    rail?.addEventListener("pointercancel", endDrag);
+    rail?.addEventListener("keydown", (e) => {
+      let next = currentIdx;
+      if (e.key === "ArrowRight" || e.key === "ArrowUp") next = Math.min(stops.length - 1, currentIdx + 1);
+      else if (e.key === "ArrowLeft" || e.key === "ArrowDown") next = Math.max(0, currentIdx - 1);
+      else if (e.key === "Home") next = 0;
+      else if (e.key === "End") next = stops.length - 1;
+      else return;
+      e.preventDefault();
+      render(next);
+      rebuildPlayer(next);
+    });
+
+    render(resolvedDefault(stops));
   });
+}
+
+function resolvedDefault(stops: { idx: number; label: string; url: string }[]): number {
+  const found = stops.findIndex((x) => /source|0 dB|1\.0×|0\b/i.test(x.label));
+  return found >= 0 ? found : 0;
 }
 
 function ensurePlaceholderTokens(): void {

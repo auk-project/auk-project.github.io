@@ -33,6 +33,7 @@ export interface DemoGroup {
   /** `slider` is used for rate / volume / pitch with one source + several outs. */
   layout: DemoKind;
   samples: DemoSample[];
+  /** Optional note shown under the group (e.g. supported dialect list). */
   note?: string;
 }
 
@@ -471,15 +472,7 @@ export const capabilities: CapabilityFamily[] = [
           },
           { id: "voice-edit-zh-2", lang: "zh", label: "Voice Edit · Mandarin", instruction: "换成活泼开朗的女声", audio: ph() },
           { id: "voice-edit-zh-3", lang: "zh", label: "Voice Edit · Mandarin", instruction: "换成浑厚的中年男声", audio: ph() },
-          { id: "voice-edit-zh-4", lang: "zh", label: "Voice Edit · Mandarin", instruction: "换成温柔的年轻女声", audio: ph() },
-          { id: "voice-edit-zh-5", lang: "zh", label: "Voice Edit · Mandarin", instruction: "换成少年音", audio: ph() },
-          { id: "voice-edit-zh-6", lang: "zh", label: "Voice Edit · Mandarin", instruction: "换成老年沙哑的男声", audio: ph() },
           { id: "voice-edit-en-1", lang: "en", label: "Voice Edit · English", instruction: "<instruction>", audio: ph() },
-          { id: "voice-edit-en-2", lang: "en", label: "Voice Edit · English", instruction: "<instruction>", audio: ph() },
-          { id: "voice-edit-en-3", lang: "en", label: "Voice Edit · English", instruction: "<instruction>", audio: ph() },
-          { id: "voice-edit-en-4", lang: "en", label: "Voice Edit · English", instruction: "<instruction>", audio: ph() },
-          { id: "voice-edit-en-5", lang: "en", label: "Voice Edit · English", instruction: "<instruction>", audio: ph() },
-          { id: "voice-edit-en-6", lang: "en", label: "Voice Edit · English", instruction: "<instruction>", audio: ph() },
         ],
       },
       {
@@ -528,7 +521,7 @@ export const capabilities: CapabilityFamily[] = [
       {
         id: "accent-edit",
         title: "Accent Edit",
-        subtitle: "De-accent to standard Mandarin · covers the supported dialect set",
+        subtitle: "De-accent to standard Mandarin · 13 dialect / regional-accent categories",
         layout: "pair",
         samples: [
           {
@@ -541,12 +534,19 @@ export const capabilities: CapabilityFamily[] = [
               out: "assets/audio/deaccent-output.wav",
             },
           },
-          { id: "accent-zh-2", lang: "zh", label: "Dialect → Standard", instruction: "<instruction>", audio: ph() },
-          { id: "accent-zh-3", lang: "zh", label: "Dialect → Standard", instruction: "<instruction>", audio: ph() },
-          { id: "accent-zh-4", lang: "zh", label: "Dialect → Standard", instruction: "<instruction>", audio: ph() },
-          { id: "accent-en-1", lang: "en", label: "Accent Edit · English", instruction: "<instruction>", audio: ph() },
-          { id: "accent-en-2", lang: "en", label: "Accent Edit · English", instruction: "<instruction>", audio: ph() },
-          { id: "accent-en-3", lang: "en", label: "Accent Edit · English", instruction: "<instruction>", audio: ph() },
+          { id: "accent-dongbei", lang: "zh", label: "东北口音 → 标准普通话", instruction: "把东北口音去掉，说得标准点", audio: ph() },
+          { id: "accent-sichuan", lang: "zh", label: "四川口音 → 标准普通话", instruction: "把四川口音去掉，说得标准点", audio: ph() },
+          { id: "accent-henan", lang: "zh", label: "河南口音 → 标准普通话", instruction: "把河南口音去掉，说得标准点", audio: ph() },
+          { id: "accent-hunan", lang: "zh", label: "湖南口音 → 标准普通话", instruction: "把湖南口音去掉，说得标准点", audio: ph() },
+          { id: "accent-jiangxi", lang: "zh", label: "江西口音 → 标准普通话", instruction: "把江西口音去掉，说得标准点", audio: ph() },
+          { id: "accent-shanghai", lang: "zh", label: "上海口音 → 标准普通话", instruction: "把上海口音去掉，说得标准点", audio: ph() },
+          { id: "accent-guangdong", lang: "zh", label: "广东口音 → 标准普通话", instruction: "把广东口音去掉，说得标准点", audio: ph() },
+          { id: "accent-fujian", lang: "zh", label: "福建口音 → 标准普通话", instruction: "把福建口音去掉，说得标准点", audio: ph() },
+          { id: "accent-shandong", lang: "zh", label: "山东口音 → 标准普通话", instruction: "把山东口音去掉，说得标准点", audio: ph() },
+          { id: "accent-hubei", lang: "zh", label: "湖北口音 → 标准普通话", instruction: "把湖北口音去掉，说得标准点", audio: ph() },
+          { id: "accent-shaanxi", lang: "zh", label: "陕西口音 → 标准普通话", instruction: "把陕西口音去掉，说得标准点", audio: ph() },
+          { id: "accent-anhui", lang: "zh", label: "安徽口音 → 标准普通话", instruction: "把安徽口音去掉，说得标准点", audio: ph() },
+          { id: "accent-tianjin", lang: "zh", label: "天津口音 → 标准普通话", instruction: "把天津口音去掉，说得标准点", audio: ph() },
         ],
       },
     ],
