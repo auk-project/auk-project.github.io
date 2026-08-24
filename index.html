@@ -29,21 +29,115 @@
             <h1 class="title is-1 publication-title">
               Auk: An Open-Source Foundational Model for Speech Generation and Editing
             </h1>
-            <p class="hero__lede">
-              One model, one natural-language interface, and 15 speech tasks
-              covering generation, content editing, enhancement and separation,
-              paralinguistic editing, and acoustic editing. Auk ships with
-              <strong>Auk-Flash</strong>, a 4-step distilled variant that
-              delivers near-equivalent editing quality at a 4.5× speedup.
-            </p>
 
             <div class="publication-links" id="resource-links"></div>
+          </div>
 
-            <ul class="hero__stats" id="hero-stats"></ul>
+          <!-- The model card replaces the old hero paragraph: same slot, but the
+               copy now switches between the base model and the distilled one. -->
+          <div class="model-panel" id="models">
+            <div class="affiliation-row" aria-label="Affiliations">
+              <img src="assets/brand/hunyuan-wordmark.png" alt="Tencent Hunyuan" />
+              <img src="assets/brand/sjtu.png" alt="Shanghai Jiao Tong University" />
+              <img src="assets/brand/sii.jpg" alt="Shanghai Innovation Institution" />
+            </div>
+
+            <div class="model-panel__tabs" role="tablist" aria-label="Model variants">
+              <button
+                type="button"
+                class="model-tab"
+                role="tab"
+                id="model-tab-auk"
+                data-model="auk"
+                aria-selected="true"
+                aria-controls="model-pane-auk"
+              >
+                Auk
+              </button>
+              <button
+                type="button"
+                class="model-tab"
+                role="tab"
+                id="model-tab-flash"
+                data-model="flash"
+                aria-selected="false"
+                aria-controls="model-pane-flash"
+              >
+                Auk-Flash
+              </button>
+            </div>
+
+            <div
+              class="model-pane"
+              role="tabpanel"
+              id="model-pane-auk"
+              data-model="auk"
+              aria-labelledby="model-tab-auk"
+            >
+              <div class="model-pane__grid">
+                <div class="model-pane__copy">
+                  <h2 class="model-pane__title">One model for every speech task</h2>
+                  <p class="model-pane__body">
+                    Auk is a 1.5B-parameter foundational model that answers a
+                    natural-language instruction with edited or generated audio. A
+                    multimodal language model reads the instruction alongside optional
+                    reference audio; a 50 Hz VAE supplies acoustic latents; a hybrid
+                    transformer fuses both streams under a flow-matching objective.
+                    The same interface covers 15 speech tasks — generation, content
+                    editing, enhancement and separation, paralinguistic editing, and
+                    acoustic editing — with no task-specific heads or adapters.
+                  </p>
+                </div>
+                <div class="model-pane__logo placeholder">&lt;Auk logo&gt;</div>
+              </div>
+            </div>
+
+            <div
+              class="model-pane"
+              role="tabpanel"
+              id="model-pane-flash"
+              data-model="flash"
+              aria-labelledby="model-tab-flash"
+              hidden
+            >
+              <div class="model-pane__grid">
+                <div class="model-pane__copy">
+                  <h2 class="model-pane__title">The same breadth in four steps</h2>
+                  <p class="model-pane__body">
+                    Auk-Flash is distilled from Auk in two stages. A trajectory-level
+                    consistency initialization hands a few-step student over to a
+                    task-routing decoupled DMD objective, which supervises separation
+                    samples with a clean-prediction regression and keeps them out of
+                    the DMD loop. The student holds the base model's editing breadth
+                    across all 15 tasks while dropping from the base sampler's
+                    iterative trajectory to 4 function evaluations, and it runs
+                    without classifier-free guidance at inference.
+                  </p>
+                </div>
+                <div class="model-pane__logo placeholder">&lt;Auk-Flash logo&gt;</div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
     </header>
+
+    <!-- ===== Overview video ===== -->
+    <section class="section video-section" id="overview-video">
+      <div class="container is-max-desktop">
+        <figure class="video-figure">
+          <div class="video-frame" role="img" aria-label="Overview video placeholder">
+            <div class="video-frame__inner">
+              <span class="video-frame__badge">Overview video</span>
+              <span class="video-frame__play" aria-hidden="true">
+                <svg viewBox="0 0 24 24" width="34" height="34"><path fill="currentColor" d="M8 5v14l11-7z"/></svg>
+              </span>
+              <p class="video-frame__slot placeholder">&lt;overview video&gt;</p>
+            </div>
+          </div>
+        </figure>
+      </div>
+    </section>
 
     <!-- ===== Abstract ===== -->
     <section class="section" id="abstract">
@@ -53,11 +147,6 @@
             <h2 class="title is-3 section-title">Abstract</h2>
             <div class="content has-text-justified">
               <p class="placeholder">&lt;abstract&gt;</p>
-            </div>
-            <div class="affiliation-row" aria-label="Affiliations">
-              <img src="assets/brand/hunyuan-wordmark.png" alt="Tencent Hunyuan" />
-              <img src="assets/brand/sjtu.png" alt="Shanghai Jiao Tong University" />
-              <img src="assets/brand/sii.jpg" alt="Shanghai Innovation Institution" />
             </div>
             <figure class="abstract-figure">
               <img
@@ -131,47 +220,34 @@
           </div>
         </div>
 
+        <h2 class="title is-3 section-title has-text-centered arch-figure__heading">
+          Pre-training taxonomy
+        </h2>
         <figure class="arch-figure arch-figure--sunburst">
           <img
             src="assets/figures/auk-pretraining-taxonomy.png"
             alt="Sunburst of Auk pre-training data: five task families expand into instruction-level operations."
           />
           <figcaption>
-            <strong>Pre-training taxonomy.</strong> The inner ring groups the
-            five task families; the outer rings enumerate the instruction-level
-            operations Auk learns jointly.
+            The inner ring groups the five task families; the outer rings
+            enumerate the instruction-level operations Auk learns jointly.
           </figcaption>
         </figure>
       </div>
     </section>
 
-    <!-- ===== Demos (single sticky capability bar) ===== -->
-    <div class="family-rail" id="family-rail" aria-label="Capabilities"></div>
+    <!-- ===== Demos (capability bar lives under the Demos heading) ===== -->
     <main class="demos" id="demos">
+      <div class="container is-max-desktop">
+        <div class="demos__intro has-text-centered">
+          <h2 class="title is-3 section-title">Demos</h2>
+        </div>
+      </div>
+      <div class="family-rail" id="family-rail" aria-label="Capabilities"></div>
       <div class="container is-max-desktop">
         <div class="demos__body" id="demos-body"></div>
       </div>
     </main>
-
-    <!-- ===== Auk-Flash ===== -->
-    <section class="section flash-section" id="flash">
-      <div class="container is-max-desktop">
-        <h2 class="title is-3 section-title">Auk-Flash: 4 steps, 4.5× faster</h2>
-        <p>
-          Auk-Flash is distilled from Auk in two stages. A trajectory-level
-          consistency initialization hands a few-step student over to a
-          task-routing decoupled DMD objective, which supervises separation
-          samples with a clean-prediction regression and keeps them out of
-          the DMD loop. The result preserves the base model's editing
-          breadth while removing the inference cost.
-        </p>
-        <ul class="flash-stats">
-          <li><strong>4</strong><span>function evaluations</span></li>
-          <li><strong>0</strong><span>CFG at inference</span></li>
-          <li><strong>4.5×</strong><span>vs. Auk base</span></li>
-        </ul>
-      </div>
-    </section>
 
     <!-- ===== Citation ===== -->
     <section class="section citation-section" id="citation">
@@ -200,11 +276,6 @@
     <footer class="footer">
       <div class="container">
         <div class="footer__row">
-          <div class="footer__brand">
-            <img src="assets/brand/sjtu.png" alt="Shanghai Jiao Tong University" />
-            <span>·</span>
-            <img src="assets/brand/sii.jpg" alt="Shanghai Innovation Institution" />
-          </div>
           <p class="footer__legal">
             &lt;license&gt; · &lt;contact&gt;<br />
             Audio samples are provided for research demonstration.

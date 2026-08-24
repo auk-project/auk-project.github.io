@@ -681,4 +681,5 @@ export const resourceLinks: { label: string; href: string | null; icon: string }
   { label: "Paper", href: null, icon: "arxiv" },
   { label: "GitHub", href: null, icon: "github" },
   { label: "Hugging Face", href: null, icon: "hf" },
+  { label: "ModelScope", href: null, icon: "modelscope" },
 ];

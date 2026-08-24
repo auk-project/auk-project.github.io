@@ -35,8 +35,11 @@ interface ChannelState {
   failed: boolean;
 }
 
-const WAVE_COLOR_TRACK = "rgba(16, 36, 45, 0.35)";
-const WAVE_COLOR_PROGRESS = "#00a5c3";
+// Waveform colors track the Hunyuan ramp: pale blue is too light to read as a
+// track at bar width, so the unplayed side is a mid tint of the brand blue and
+// the played-through side is the brand blue itself.
+const WAVE_COLOR_TRACK = "rgba(0, 85, 233, 0.28)";
+const WAVE_COLOR_PROGRESS = "#0055e9";
 
 const players: Set<AudioPlayer> = new Set();
 let activePlayer: AudioPlayer | null = null;
@@ -128,7 +131,9 @@ export class AudioPlayer {
         btn.addEventListener("click", () => this.setActive(idx, true));
         this.abSwitch!.appendChild(btn);
       });
-      this.root.appendChild(this.abSwitch);
+      // The A/B switch belongs at the card's top-right, above the instruction,
+      // so it reads as a header control rather than a footer afterthought.
+      this.root.insertBefore(this.abSwitch, this.root.firstChild);
     }
   }
 
@@ -276,7 +281,9 @@ export class AudioPlayer {
         btn.setAttribute("aria-selected", i === idx ? "true" : "false");
       });
     }
-    if (announce) this.setStatus(`Switched to ${next.track.label}.`);
+    // The selected pill already shows which track is live, so a switch needs no
+    // status line; `announce` only reaches assistive tech.
+    if (announce && this.statusEl) this.statusEl.setAttribute("aria-label", `Playing ${next.track.label}`);
     this.updateTime();
     this.drawWave();
   }
@@ -400,7 +407,7 @@ export class AudioPlayer {
 
     const peaks = ch.peaks;
     if (!peaks) {
-      ctx.fillStyle = "rgba(16, 36, 45, 0.55)";
+      ctx.fillStyle = "rgba(13, 27, 62, 0.5)";
       ctx.font = "12px 'Google Sans', sans-serif";
       ctx.textAlign = "center";
       ctx.fillText(ch.loading ? "Decoding waveform…" : "Click play to load", w / 2, h / 2);

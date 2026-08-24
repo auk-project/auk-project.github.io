@@ -1,40 +1,62 @@
 /* ============================================================
    Auk demo page (light theme)
-   Visual language mirrors HunyuanVideo-Avatar: Google Sans /
-   Noto Sans typography, deep-current blue links, is-max-desktop
-   container, rounded resource buttons — on a clean white canvas.
+
+   Palette is sampled from the Tencent Hunyuan mark:
+     #0055E9  deep blue   (46% of the logo — the primary)
+     #00BCFF  cyan        (15% — the accent / gradient partner)
+     #A8DFF5  pale blue   (31% — tints, surfaces, waveform track)
+     #ECECEE  warm grey   (6%  — neutral ground)
+   Typography follows HunyuanVideo-Avatar: Google Sans / Noto Sans on a
+   clean white canvas, is-max-desktop container, rounded resource buttons.
    ============================================================ */
 
 :root {
   color-scheme: light;
+
+  /* --- Hunyuan brand ramp --- */
+  --brand-blue: #0055e9;
+  --brand-blue-hover: #0044c4;
+  --brand-cyan: #00bcff;
+  --brand-pale: #a8dff5;
+  --brand-deep: #0a2e7a;
+  --brand-grey: #ececee;
+
   --bg: #ffffff;
-  --bg-soft: #f7f9fb;
+  --bg-soft: #f4f8fd;
   --bg-card: #ffffff;
-  --bg-elev: #f2f6f8;
-  --bg-hover: #eaf2f6;
-  --rule: rgba(16, 36, 45, 0.12);
-  --rule-strong: rgba(16, 36, 45, 0.28);
-  --ink: #10242d;
-  --ink-soft: rgba(16, 36, 45, 0.78);
-  --ink-faint: rgba(16, 36, 45, 0.55);
-  --link: #1470b0;
-  --link-hover: #0b5689;
-  --accent: #00879c;
-  --accent-2: #00a5c3;
-  --accent-deep: #01627a;
+  --bg-elev: #eef4fc;
+  --bg-hover: #e4eefb;
+  --rule: rgba(10, 46, 122, 0.14);
+  --rule-strong: rgba(10, 46, 122, 0.3);
+  --ink: #0d1b3e;
+  --ink-soft: rgba(13, 27, 62, 0.76);
+  --ink-faint: rgba(13, 27, 62, 0.52);
+  --link: var(--brand-blue);
+  --link-hover: var(--brand-blue-hover);
+
+  /* Legacy aliases kept so every rule resolves to the brand ramp. */
+  --accent: var(--brand-blue);
+  --accent-2: var(--brand-cyan);
+  --accent-deep: var(--brand-deep);
   --accent-coral: #e5484d;
-  --accent-violet: #574fc4;
-  --accent-violet-2: #6a62d6;
+  --accent-violet: var(--brand-blue);
+  --accent-violet-2: var(--brand-cyan);
   --danger: #e5484d;
+
   --radius-sm: 6px;
   --radius-md: 10px;
   --radius-lg: 18px;
   --container: 1152px;
+
+  /* One size for every section heading, one for every supporting paragraph. */
+  --fs-h2: 1.75rem;
+  --fs-h3: 1.35rem;
+  --fs-lede: 1rem;
   --font-display: "Google Sans", "Noto Sans", system-ui, sans-serif;
   --font-body: "Noto Sans", system-ui, sans-serif;
   --font-mono: "JetBrains Mono", "Fira Code", ui-monospace, Menlo, monospace;
   --font-serif: "Castoro", "Noto Serif", serif;
-  --shadow-card: 0 10px 34px rgba(16, 36, 45, 0.08);
+  --shadow-card: 0 10px 34px rgba(10, 46, 122, 0.1);
 }
 
 * {
@@ -148,7 +170,10 @@ button {
   }
 }
 
-/* ============ Title scale ============= */
+/* ============ Title scale =============
+   Every section heading resolves to --fs-h2 and every supporting paragraph to
+   --fs-lede, so "Abstract", "Architecture", "Demos", a family name and a model
+   pane title all read at one size, and every lede/intro paragraph at another. */
 .title {
   font-family: var(--font-display);
   font-weight: 700;
@@ -160,16 +185,28 @@ button {
   font-size: 2.5rem;
   letter-spacing: -0.01em;
 }
-.title.is-3 {
-  font-size: 1.75rem;
+.title.is-3,
+.model-pane__title {
+  font-family: var(--font-display);
+  font-size: var(--fs-h2);
+  font-weight: 700;
+  line-height: 1.2;
   letter-spacing: -0.005em;
+  color: var(--ink);
+}
+/* A family name sits one level under "Demos" — same family and weight, one
+   step down in size, so the rail's selection reads as a child of the section. */
+.family-section__name {
+  font-family: var(--font-display);
+  font-size: var(--fs-h3);
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: -0.005em;
+  color: var(--ink);
 }
 @media (min-width: 1024px) {
   .title.is-1 {
     font-size: 3rem;
-  }
-  .title.is-3 {
-    font-size: 2rem;
   }
 }
 
@@ -185,18 +222,25 @@ button {
 .section-title {
   margin-bottom: 1rem;
 }
-.section-lede {
+.section-lede,
+.family-section__lede,
+.model-pane__body,
+.arch-figure figcaption,
+.video-figure figcaption {
   color: var(--ink-soft);
+  font-size: var(--fs-lede);
+  line-height: 1.65;
+}
+.section-lede {
   max-width: 100%;
   margin: 0 auto 2rem;
-  font-size: 1.05rem;
 }
 
 .placeholder {
   font-family: var(--font-mono);
   color: var(--accent-deep);
-  background: rgba(0, 165, 195, 0.1);
-  border: 1px dashed rgba(0, 135, 156, 0.45);
+  background: rgba(0, 188, 255, 0.12);
+  border: 1px dashed rgba(0, 85, 233, 0.4);
   padding: 0.05em 0.4em;
   border-radius: 4px;
   font-size: 0.92em;
@@ -206,9 +250,7 @@ button {
 .hero {
   position: relative;
   min-height: auto;
-  background: radial-gradient(circle at 15% 20%, rgba(0, 165, 195, 0.1), transparent 50%),
-    radial-gradient(circle at 85% 80%, rgba(87, 79, 196, 0.08), transparent 50%),
-    var(--bg);
+  background: var(--bg);
   padding: 2rem 0 2rem;
   border-bottom: 1px solid var(--rule);
 }
@@ -218,16 +260,6 @@ button {
 .hero__inner {
   text-align: center;
   padding: 1rem 0 0.5rem;
-}
-.hero__lede {
-  max-width: 920px;
-  margin: 1rem auto 1rem;
-  color: var(--ink-soft);
-  font-size: 0.9rem;
-  line-height: 1.55;
-}
-.hero__lede strong {
-  color: var(--ink);
 }
 .publication-title {
   font-family: var(--font-display);
@@ -282,7 +314,7 @@ button {
 }
 .button:hover {
   background: var(--bg-hover);
-  border-color: rgba(16, 36, 45, 0.5);
+  border-color: rgba(10, 46, 122, 0.45);
 }
 .button:disabled,
 .button.is-disabled,
@@ -291,7 +323,7 @@ button {
   cursor: not-allowed;
   background: #f6f8fa;
   color: var(--ink-soft);
-  border-color: rgba(16, 36, 45, 0.15);
+  border-color: rgba(10, 46, 122, 0.15);
 }
 .button .icon {
   display: inline-flex;
@@ -299,50 +331,153 @@ button {
   font-size: 1.1em;
 }
 
-.hero__stats {
-  list-style: none;
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 0.75rem;
-  margin: 2rem auto 0;
-  padding: 0;
-  max-width: 880px;
+
+/* ============ Model card (Auk / Auk-Flash tabs) =============
+   Borderless: this sits in the hero where the intro paragraph used to be, so
+   only the tab row and the facts rule carry any structure. */
+.model-panel {
+  max-width: 940px;
+  margin: 1.5rem auto 0;
+  text-align: left;
 }
-.hero__stats li {
+.model-panel__tabs {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+.model-tab {
+  font-family: var(--font-display);
+  font-size: 0.92rem;
+  font-weight: 500;
+  padding: 0.4em 1.1em;
+  border-radius: 9999px;
   border: 1px solid var(--rule);
-  border-radius: var(--radius-md);
-  padding: 0.9rem 1rem;
-  background: var(--bg-soft);
+  background: rgba(255, 255, 255, 0.7);
+  color: var(--ink-soft);
+  transition: background 120ms ease, color 120ms ease, border-color 120ms ease;
+}
+.model-tab:hover {
+  color: var(--brand-blue);
+  border-color: var(--brand-cyan);
+}
+.model-tab[aria-selected="true"] {
+  background: var(--brand-blue);
+  border-color: var(--brand-blue);
+  color: #fff;
+}
+.model-tab:focus-visible {
+  outline: 2px solid var(--brand-cyan);
+  outline-offset: 3px;
+}
+.model-pane[hidden] {
+  display: none;
+}
+.model-pane__grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.25rem;
+  align-items: start;
+}
+.model-pane__title {
+  margin: 0 0 0.6rem;
+}
+.model-pane__body {
+  margin: 0;
+}
+.model-pane__logo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 150px;
+  text-align: center;
+}
+@media (min-width: 860px) {
+  .model-pane__grid {
+    grid-template-columns: minmax(0, 1fr) 240px;
+    gap: 2rem;
+  }}
+
+/* ============ Overview video ============= */
+.video-section {
+  border-top: none;
+  padding: 2.5rem 0 3rem;
+}
+.video-figure {
+  margin: 0;
+  max-width: 880px;
+  margin-inline: auto;
+}
+.video-frame {
+  position: relative;
+  aspect-ratio: 16 / 9;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--rule);
+  background: linear-gradient(135deg, rgba(0, 85, 233, 0.07), rgba(0, 188, 255, 0.1) 45%, rgba(168, 223, 245, 0.16));
+  box-shadow: var(--shadow-card);
+  overflow: hidden;
+}
+.video-frame::after {
+  /* Faint diagonal weave marks the frame as a slot, not finished artwork. */
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    135deg,
+    transparent,
+    transparent 14px,
+    rgba(0, 85, 233, 0.045) 14px,
+    rgba(0, 85, 233, 0.045) 28px
+  );
+  pointer-events: none;
+}
+.video-frame__inner {
+  position: absolute;
+  inset: 0;
   display: flex;
   flex-direction: column;
-  gap: 0.15rem;
+  align-items: center;
+  justify-content: center;
+  gap: 0.9rem;
+  z-index: 1;
 }
-.hero__stats li strong {
+.video-frame__badge {
   font-family: var(--font-display);
-  font-size: 1.3rem;
-  color: var(--ink);
-  letter-spacing: -0.01em;
-}
-.hero__stats li span {
-  color: var(--ink-faint);
   font-size: 0.72rem;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
+  color: var(--brand-deep);
 }
-@media (min-width: 768px) {
-  .hero__stats {
-    grid-template-columns: repeat(5, minmax(0, 1fr));
-  }
+.video-frame__play {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 74px;
+  height: 74px;
+  border-radius: 50%;
+  background: var(--brand-blue);
+  color: #fff;
+  box-shadow: 0 10px 30px rgba(0, 85, 233, 0.3);
+}
+.video-frame__play svg {
+  margin-left: 4px;
+}
+.video-frame__slot {
+  margin: 0;
+}
+.video-figure figcaption {
+  margin: 1rem auto 0;
+  text-align: center;
+  max-width: 68ch;
 }
 
-/* ============ Abstract ============= */
+/* ============ Affiliation logos (above the model card) ============= */
 .affiliation-row {
   display: flex;
   justify-content: center;
   align-items: center;
   gap: 2.4rem;
   flex-wrap: wrap;
-  margin-top: 2rem;
+  margin: 0 0 1.75rem;
 }
 .affiliation-row img {
   max-height: 56px;
@@ -377,30 +512,35 @@ button {
   margin: 0 0 2.5rem;
   text-align: left;
 }
-/* Show only the left half of the architecture figure.
-   Source image is 4842x2125. Left half is 2421x2125 (aspect ratio ~1.139).
-   The viewport matches that aspect ratio; the image is rendered at 2x
-   viewport width (slightly oversized to avoid sub-pixel white seams at the
-   right clipping edge) and pinned to the left. */
+/* Show only panel (a) of the architecture figure, centered.
+   Source image is 4842x2125. Panel (a) content ends at x=2455 and the dashed
+   divider sits at x=2495, so the crop edge is 2478 — past the content, before
+   the divider. A plain 50% split (2421) clipped the "Target Generated Audio"
+   column, which is what produced the visible truncation. */
 .arch-figure--left {
-  text-align: left;
+  text-align: center;
+  margin-left: auto;
+  margin-right: auto;
 }
 .arch-figure--left .arch-figure__viewport {
   position: relative;
   width: 100%;
-  max-width: 640px;
+  max-width: 820px;
+  margin: 0 auto;
   overflow: hidden;
   border-radius: var(--radius-md);
   border: 1px solid var(--rule);
   box-shadow: var(--shadow-card);
-  aspect-ratio: 2421 / 2125;
+  aspect-ratio: 2478 / 2125;
   background: var(--bg-card);
 }
 .arch-figure--left img {
   position: absolute;
   left: 0;
   top: 0;
-  width: calc(200% + 2px);
+  /* 4842 / 2478 = 1.9540 — render the full sheet this many viewport widths
+     wide so the crop edge lands exactly on x=2478. */
+  width: 195.4%;
   max-width: none;
   height: 100%;
   display: block;
@@ -411,44 +551,20 @@ button {
   text-align: center !important;
   max-width: 80ch;
 }
-.arch-figure--sunburst figcaption strong {
-  color: var(--ink);
-  font-weight: 600;
-}
-.arch-figure--left {
-  text-align: left;
-}
-.arch-figure--left .arch-figure__viewport {
-  position: relative;
-  width: 100%;
-  max-width: 640px;
-  overflow: hidden;
-  border-radius: var(--radius-md);
-  border: 1px solid var(--rule);
-  box-shadow: var(--shadow-card);
-  aspect-ratio: 2421 / 2125;
-  background: var(--bg-card);
-}
-.arch-figure--left img {
-  position: absolute;
-  left: 0;
-  top: 0;
-  width: calc(200% + 2px);
-  max-width: none;
-  height: 100%;
-  display: block;
+/* The taxonomy figure is introduced by a real heading, so its caption starts
+   flush with no bold lead-in. */
+.arch-figure__heading {
+  margin-top: 3rem;
 }
 .arch-figure figcaption {
   margin: 1rem 0 0;
-  color: var(--ink-soft);
-  font-size: 0.95rem;
   max-width: 100%;
   text-align: left;
-  line-height: 1.6;
 }
 .arch-figure--left figcaption {
-  margin-left: 0;
-  margin-right: 0;
+  max-width: 820px;
+  margin-left: auto;
+  margin-right: auto;
 }
 .arch-figure figcaption strong {
   color: var(--ink);
@@ -478,13 +594,22 @@ button {
   margin: 0;
 }
 
-/* ============ Capability bar (single sticky nav) ============= */
+/* ============ Capability bar (sticky nav under the Demos heading) ============= */
 .demos {
-  background: linear-gradient(180deg, rgba(0, 165, 195, 0.03), transparent 30%);
-  padding: 0.75rem 0 3rem;
+  background: var(--bg-soft);
+  padding: 3.5rem 0 4rem;
   border-top: 1px solid var(--rule);
 }
+.demos__intro {
+  margin-bottom: 1.25rem;
+}
+.demos__intro .section-lede {
+  margin: 0;
+  max-width: 72ch;
+}
 
+/* The sticky rail spans the full viewport so its bottom rule reads as one
+   continuous line; the chips inside stay aligned to the page container. */
 .family-rail {
   position: sticky;
   top: 0;
@@ -492,10 +617,9 @@ button {
   display: flex;
   flex-wrap: nowrap;
   gap: 0.5rem;
-  padding: 0.7rem 1.25rem;
-  max-width: var(--container);
-  margin: 0 auto;
-  background: rgba(255, 255, 255, 0.95);
+  padding: 0.7rem max(1.25rem, calc((100vw - var(--container)) / 2 + 1.25rem));
+  margin: 0 0 1.75rem;
+  background: rgba(244, 248, 253, 0.94);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
   border-bottom: 1px solid var(--rule);
@@ -514,14 +638,14 @@ button {
   white-space: nowrap;
 }
 .family-rail a:hover {
-  color: var(--ink);
+  color: var(--brand-blue);
   text-decoration: none;
-  border-color: rgba(16, 36, 45, 0.4);
+  border-color: var(--brand-cyan);
 }
 .family-rail a[data-rail-active="1"] {
   color: #fff;
-  background: var(--accent-2);
-  border-color: var(--accent-2);
+  background: var(--brand-blue);
+  border-color: var(--brand-blue);
 }
 
 .demos__body {
@@ -540,16 +664,11 @@ button {
   text-align: left;
 }
 .family-section__name {
-  font-family: var(--font-display);
-  font-size: 1.65rem;
   margin: 0 0 0.5rem;
-  color: var(--ink);
 }
 .family-section__lede {
-  color: var(--ink-soft);
-  max-width: 78ch;
+  max-width: 100%;
   margin: 0;
-  font-size: 0.95rem;
 }
 
 .demo-group {
@@ -588,33 +707,51 @@ button {
    Row 1: demo title + lang pill
    Row 2: Instruction: ...
    Row 3: audio player (no border, blends with the card) */
+/* Row 1 pairs the instruction with the A/B switch; row 2 is the player. The
+   switch is lifted out of the player's own flow via display: contents so both
+   land on the card grid without a negative margin. */
 .demo-card {
   background: var(--bg-card);
   border: 1px solid var(--rule);
   border-radius: var(--radius-md);
   padding: 1rem 1.2rem 1.2rem;
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-  box-shadow: 0 2px 12px rgba(16, 36, 45, 0.04);
-}
-.demo-card__head {
-  display: flex;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
-  gap: 0.6rem;
-  flex-wrap: nowrap;
-  min-height: 1.4em;
+  gap: 0.75rem 1rem;
+  box-shadow: 0 2px 12px rgba(10, 46, 122, 0.05);
 }
-.demo-card__title {
-  font-family: var(--font-mono);
-  font-size: 0.88rem;
-  font-weight: 500;
-  color: var(--accent-deep);
-  letter-spacing: 0.01em;
-  flex: 1 1 auto;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+/* Explicit rows: the instruction and the switch both claim row 1 (columns 1
+   and 2), and the player's waveform takes row 2 across both columns. DOM order
+   puts the player after the instruction, so the rows must be named. */
+.demo-card > .demo-card__instruction {
+  grid-column: 1;
+  grid-row: 1;
+  align-self: center;
+}
+.demo-card > .placeholder-text,
+.demo-card > .auk-slider {
+  grid-column: 1 / -1;
+}
+.demo-card > .auk-player--ab {
+  display: contents;
+}
+.demo-card > .auk-player--ab > .auk-player__ab {
+  grid-column: 2;
+  grid-row: 1;
+  align-self: center;
+}
+.demo-card > .auk-player--ab > .auk-player__control {
+  grid-column: 1 / -1;
+  grid-row: 2;
+}
+.demo-card > .auk-player--ab > .auk-player__tracks,
+.demo-card > .auk-player--ab > .auk-player__status {
+  display: none;
+}
+/* A single-track card (slider panes) keeps the plain column flow. */
+.demo-card > .auk-player--single {
+  grid-column: 1 / -1;
 }
 .demo-card__instruction {
   margin: 0;
@@ -629,26 +766,15 @@ button {
   font-weight: 600;
   margin-right: 0.35em;
 }
-.lang-pill {
-  font-family: var(--font-mono);
-  font-size: 0.7rem;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  border: 1px solid var(--rule);
-  border-radius: 9999px;
-  padding: 0.1em 0.55em;
-  color: var(--ink-soft);
-  flex: 0 0 auto;
-}
 .placeholder-card {
   background: repeating-linear-gradient(
     135deg,
-    rgba(0, 165, 195, 0.03),
-    rgba(0, 165, 195, 0.03) 6px,
-    rgba(0, 165, 195, 0.08) 6px,
-    rgba(0, 165, 195, 0.08) 12px
+    rgba(0, 188, 255, 0.04),
+    rgba(0, 188, 255, 0.04) 6px,
+    rgba(0, 85, 233, 0.08) 6px,
+    rgba(0, 85, 233, 0.08) 12px
   );
-  border: 1px dashed rgba(0, 135, 156, 0.4);
+  border: 1px dashed rgba(0, 85, 233, 0.35);
   color: var(--ink-soft);
 }
 .placeholder-card .demo-card__instruction {
@@ -670,6 +796,7 @@ button {
   position: relative;
   padding: 0;
 }
+
 .auk-player__tracks {
   display: none;
 }
@@ -683,7 +810,7 @@ button {
   width: 38px;
   height: 38px;
   border-radius: 50%;
-  background: var(--accent-2);
+  background: var(--brand-blue);
   color: #ffffff;
   border: none;
   display: inline-flex;
@@ -696,7 +823,7 @@ button {
   height: 16px;
 }
 .auk-player__play:hover {
-  background: var(--accent-deep);
+  background: var(--brand-blue-hover);
 }
 .auk-player__play:focus-visible {
   outline: 2px solid var(--accent-deep);
@@ -728,8 +855,8 @@ button {
   height: 100%;
   width: 0;
   pointer-events: none;
-  border-right: 2px solid var(--accent-deep);
-  background: rgba(0, 165, 195, 0.08);
+  border-right: 2px solid var(--brand-blue);
+  background: rgba(0, 188, 255, 0.1);
 }
 .auk-player__time {
   font-family: var(--font-mono);
@@ -748,6 +875,8 @@ button {
   display: flex;
   gap: 0.4rem;
   flex-wrap: wrap;
+  justify-content: flex-end;
+  order: -1;
 }
 .auk-player__ab-btn {
   font-family: var(--font-display);
@@ -760,17 +889,17 @@ button {
   transition: background 120ms ease, border-color 120ms ease, color 120ms ease;
 }
 .auk-player__ab-btn[aria-selected="true"] {
-  background: var(--accent-2);
+  background: var(--brand-blue);
   color: #ffffff;
-  border-color: var(--accent-2);
+  border-color: var(--brand-blue);
 }
 .auk-player__ab-btn:hover {
   color: var(--ink);
-  border-color: rgba(16, 36, 45, 0.45);
+  border-color: rgba(10, 46, 122, 0.42);
 }
 .auk-player__ab-btn[aria-selected="true"]:hover {
   color: #ffffff;
-  background: var(--accent-deep);
+  background: var(--brand-blue-hover);
 }
 .auk-player__status {
   font-family: var(--font-mono);
@@ -779,35 +908,55 @@ button {
   min-height: 1em;
 }
 
-/* ============ Slider — pill wrap, labels above the rail ============= */
+/* ============ Slider — bare rail, tick labels above =============
+   No card, no pill wrap: the rail sits directly on the demo card, so the only
+   visible structure is the track, the labels above it, and the thumb. */
 .auk-slider {
   position: relative;
-  display: inline-flex;
-  flex-direction: column;
-  align-items: stretch;
+  display: block;
   width: 100%;
-  background: var(--bg-soft);
-  border-radius: 9999px;
-  padding: 0.7rem 1rem 1rem;
-  border: 1px solid var(--rule);
+  padding: 0.35rem 0.6rem 0;
+}
+.auk-slider__labels {
+  position: relative;
+  height: 1.05rem;
+  margin-bottom: 0.5rem;
+}
+.auk-slider__stop {
+  position: absolute;
+  bottom: 0;
+  transform: translateX(-50%);
+  background: transparent;
+  border: 0;
+  padding: 0.1rem 0.2rem;
+  color: var(--ink-faint);
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  line-height: 1;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: color 120ms ease;
+}
+.auk-slider__stop[aria-pressed="true"] {
+  color: var(--brand-blue);
+  font-weight: 700;
+}
+.auk-slider__stop:hover {
+  color: var(--ink);
 }
 .auk-slider__rail {
   position: relative;
-  height: 18px;
+  height: 20px;
   display: flex;
   align-items: center;
-  cursor: grab;
+  cursor: pointer;
   touch-action: none;
   user-select: none;
-  margin-top: 0.35rem;
-}
-.auk-slider__rail:active {
-  cursor: grabbing;
 }
 .auk-slider__rail:focus-visible {
-  outline: 2px solid var(--accent-2);
-  outline-offset: 4px;
-  border-radius: 6px;
+  outline: 2px solid var(--brand-cyan);
+  outline-offset: 6px;
+  border-radius: 9999px;
 }
 .auk-slider__rail::before {
   content: "";
@@ -815,17 +964,39 @@ button {
   left: 0;
   right: 0;
   top: 50%;
-  height: 6px;
-  background: rgba(16, 36, 45, 0.15);
+  height: 5px;
+  background: rgba(10, 46, 122, 0.12);
   border-radius: 9999px;
   transform: translateY(-50%);
+}
+.auk-slider__ticks {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+}
+/* Ticks sit just below the track rather than on it, so the filled side stays
+   an unbroken bar. */
+.auk-slider__tick {
+  position: absolute;
+  top: calc(50% + 6px);
+  width: 1px;
+  height: 4px;
+  margin-left: -0.5px;
+  background: rgba(10, 46, 122, 0.22);
+}
+.auk-slider__tick.is-source {
+  height: 6px;
+  width: 2px;
+  margin-left: -1px;
+  background: rgba(10, 46, 122, 0.4);
 }
 .auk-slider__fill {
   position: absolute;
   left: 0;
   top: 50%;
-  height: 6px;
-  background: linear-gradient(90deg, var(--accent-2), var(--accent-deep));
+  height: 5px;
+  background: linear-gradient(90deg, var(--brand-cyan), var(--brand-blue));
   border-radius: 9999px;
   transform: translateY(-50%);
   pointer-events: none;
@@ -836,66 +1007,28 @@ button {
   width: 18px;
   height: 18px;
   border-radius: 50%;
-  background: var(--accent-2);
-  border: 3px solid #fff;
-  box-shadow: 0 2px 6px rgba(16, 36, 45, 0.3);
+  background: #fff;
+  border: 4px solid var(--brand-blue);
+  box-shadow: 0 1px 5px rgba(10, 46, 122, 0.28);
   transform: translate(-50%, -50%);
   pointer-events: none;
+  z-index: 2;
 }
-.auk-slider__labels {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 0.05rem;
+.auk-slider__foot {
+  position: relative;
+  height: 0.9rem;
+  margin-top: 0.5rem;
 }
-.auk-slider__stop {
-  background: transparent;
-  border: 0;
-  padding: 0.1rem 0.15rem;
-  display: inline-flex;
-  align-items: center;
-  color: var(--ink-soft);
+.auk-slider__source {
+  position: absolute;
+  top: 0;
+  transform: translateX(-50%);
   font-family: var(--font-mono);
-  font-size: 0.7rem;
-  cursor: pointer;
+  font-size: 0.6rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
   white-space: nowrap;
-}
-.auk-slider__stop[aria-pressed="true"] {
-  color: var(--accent-deep);
-  font-weight: 700;
-}
-.auk-slider__stop:hover {
-  color: var(--ink);
-}
-
-/* ============ Auk-Flash band ============= */
-.flash-section {
-  background: linear-gradient(180deg, rgba(87, 79, 196, 0.06), transparent 80%);
-}
-.flash-stats {
-  list-style: none;
-  padding: 0;
-  margin: 1.5rem 0 0;
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 0.75rem;
-}
-.flash-stats li {
-  border: 1px solid rgba(87, 79, 196, 0.3);
-  border-radius: var(--radius-md);
-  padding: 1rem;
-  text-align: center;
-  background: rgba(87, 79, 196, 0.04);
-}
-.flash-stats li strong {
-  display: block;
-  font-family: var(--font-display);
-  font-size: 1.8rem;
-  color: var(--accent-violet);
-}
-.flash-stats li span {
-  color: var(--ink-soft);
-  font-size: 0.85rem;
 }
 
 /* ============ Citation ============= */
@@ -941,24 +1074,6 @@ button {
   align-items: center;
   text-align: center;
 }
-.footer__brand {
-  display: inline-flex;
-  align-items: center;
-  gap: 1.1rem;
-  flex-wrap: wrap;
-  justify-content: center;
-}
-.footer__brand img {
-  max-height: 36px;
-  opacity: 0.88;
-}
-.footer__brand img[alt="Shanghai Innovation Institution"] {
-  max-height: 40px;
-  border-radius: 50%;
-}
-.footer__brand span {
-  color: var(--ink-faint);
-}
 .footer__legal {
   color: var(--ink-faint);
   font-size: 0.85rem;
@@ -981,9 +1096,6 @@ button {
   }
   .section {
     padding: 3rem 0;
-  }
-  .flash-stats {
-    grid-template-columns: 1fr;
   }
   .demo-list {
     grid-template-columns: 1fr;
