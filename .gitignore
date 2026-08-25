@@ -3,3 +3,5 @@ dist/
 .DS_Store
 *.log
 .Temp/
+# 根目录原始素材（母版 wav），不随仓库分发
+/*.wav

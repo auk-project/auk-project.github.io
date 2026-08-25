@@ -83,9 +83,6 @@
                     multimodal language model reads the instruction alongside optional
                     reference audio; a 50 Hz VAE supplies acoustic latents; a hybrid
                     transformer fuses both streams under a flow-matching objective.
-                    The same interface covers 15 speech tasks — generation, content
-                    editing, enhancement and separation, paralinguistic editing, and
-                    acoustic editing — with no task-specific heads or adapters.
                   </p>
                 </div>
                 <div class="model-pane__logo placeholder">&lt;Auk logo&gt;</div>
@@ -104,14 +101,11 @@
                 <div class="model-pane__copy">
                   <h2 class="model-pane__title">The same breadth in four steps</h2>
                   <p class="model-pane__body">
-                    Auk-Flash is distilled from Auk in two stages. A trajectory-level
+                    Auk-Flash is distilled from Auk in two stages: a trajectory-level
                     consistency initialization hands a few-step student over to a
-                    task-routing decoupled DMD objective, which supervises separation
-                    samples with a clean-prediction regression and keeps them out of
-                    the DMD loop. The student holds the base model's editing breadth
-                    across all 15 tasks while dropping from the base sampler's
-                    iterative trajectory to 4 function evaluations, and it runs
-                    without classifier-free guidance at inference.
+                    task-routing decoupled DMD objective, then supervises separation
+                    with clean-prediction regression. The result keeps the base
+                    model's breadth at 4 steps, with no CFG at inference.
                   </p>
                 </div>
                 <div class="model-pane__logo placeholder">&lt;Auk-Flash logo&gt;</div>
@@ -163,11 +157,6 @@
     <section class="section architecture-section" id="architecture">
       <div class="container is-max-desktop">
         <h2 class="title is-3 section-title has-text-centered">Architecture</h2>
-        <p class="section-lede has-text-centered">
-          A multimodal language model encodes the instruction (and optional reference audio);
-          a 50 Hz VAE provides acoustic latents; a FLUX-style hybrid transformer fuses
-          the two streams and predicts the denoised latent decoded by the VAE.
-        </p>
         <figure class="arch-figure arch-figure--left">
           <div class="arch-figure__viewport">
             <img
@@ -198,8 +187,7 @@
             <h3>VAE acoustic latents</h3>
             <p>
               A flow-augmented 24 kHz VAE encodes audio to 50 Hz, 64-dim
-              latents. Its encoder provides the reference branch; the decoder
-              reconstructs the final 24 kHz waveform.
+              latents.
             </p>
           </div>
           <div class="arch-tile">
@@ -214,8 +202,7 @@
             <h3>Pre-training scale</h3>
             <p>
               3.03B instruction–audio instances spanning 1.95M hours. 600k
-              updates on 256 H20 GPUs, 32-sample micro-batches, 50 Hz flow
-              matching biased toward the low-noise regime.
+              updates on 256 H20 GPUs, 32-sample micro-batches.
             </p>
           </div>
         </div>

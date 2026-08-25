@@ -147,6 +147,12 @@ function renderPair(s: DemoSample, src?: string, out?: string): string {
   const tracks: { url: string; label: string; side?: "a" | "b" }[] = [];
   if (src) tracks.push({ url: src, label: "Input", side: "a" });
   if (out) tracks.push({ url: out, label: "Output", side: "b" });
+  // Every editing card exposes an Input/Output switch. Cards with a source but
+  // no generated output yet show the source on both sides — the switch still
+  // works, and the output track is a placeholder to be replaced later.
+  if (src && !out && tracks.length === 1) {
+    tracks.push({ url: src, label: "Output", side: "b" });
+  }
   const cfg = JSON.stringify({ tracks }).replace(/'/g, "&#39;");
   return `
     <article class="demo-card" data-sample-id="${escapeHtml(s.id)}">
@@ -161,7 +167,7 @@ const SOURCE_STOP = /\(\s*source\s*\)/i;
 function renderSlider(s: DemoSample, src: string, outs: { label: string; url: string }[]): string {
   const stops = outs.map((o, i) => ({ idx: i, label: o.label, url: o.url }));
   const resolvedIdx = resolvedDefault(stops);
-  const cfgJson = JSON.stringify({ slider: { stops, defaultIdx: resolvedIdx } }).replace(/'/g, "&#39;");
+  const cfgJson = JSON.stringify({ slider: { src, stops, defaultIdx: resolvedIdx } }).replace(/'/g, "&#39;");
 
   const pct = (i: number) => (stops.length > 1 ? (i / (stops.length - 1)) * 100 : 0);
   // The "(source)" suffix is dropped from the visible tick label — it would
@@ -187,9 +193,13 @@ function renderSlider(s: DemoSample, src: string, outs: { label: string; url: st
     sourceIdx >= 0 ? `<span class="auk-slider__source" style="left:${pct(sourceIdx)}%">source</span>` : "";
 
   const firstUrl = stops[resolvedIdx]?.url ?? src;
-  const firstLabel = stops[resolvedIdx]?.label ?? "Source";
+  // The player exposes Input/Output like every other card: the input side is
+  // always the source track, the output side follows the selected slider stop.
   const playerCfg = JSON.stringify({
-    tracks: [{ url: firstUrl, label: firstLabel }],
+    tracks: [
+      { url: src, label: "Input", side: "a" },
+      { url: firstUrl, label: "Output", side: "b" },
+    ],
   }).replace(/'/g, "&#39;");
   return `
     <article class="demo-card" data-sample-id="${escapeHtml(s.id)}" data-slider>
@@ -237,11 +247,13 @@ function attachBibtexCopy(): void {
 function attachSliderLogic(): void {
   document.querySelectorAll<HTMLElement>(".auk-slider").forEach((slider) => {
     let stops: { idx: number; label: string; url: string }[] = [];
+    let srcUrl = "";
     try {
       const parsed = JSON.parse(slider.dataset.aukSlider || "{}") as {
-        slider?: { stops?: { idx: number; label: string; url: string }[] };
+        slider?: { src?: string; stops?: { idx: number; label: string; url: string }[] };
       };
       stops = parsed.slider?.stops ?? [];
+      srcUrl = parsed.slider?.src ?? "";
     } catch {
       return;
     }
@@ -257,7 +269,10 @@ function attachSliderLogic(): void {
       const stop = stops[idx];
       if (!stop || !mount || !card) return;
       const cfg = JSON.stringify({
-        tracks: [{ url: stop.url, label: stop.label }],
+        tracks: [
+          { url: srcUrl, label: "Input", side: "a" },
+          { url: stop.url, label: "Output", side: "b" },
+        ],
       }).replace(/'/g, "&#39;");
       const fresh = document.createElement("div");
       fresh.className = "auk-player-mount";
