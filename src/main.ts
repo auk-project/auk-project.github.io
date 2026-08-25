@@ -359,7 +359,7 @@ function ensurePlaceholderTokens(): void {
   const text = document.body.textContent ?? "";
   const okAudio = text.includes("[audio|<instruction><reference audio description>]");
   if (!okAudio) {
-    console.warn("Auk demo page: placeholder syntax not detected.");
+    console.warn("AuK demo page: placeholder syntax not detected.");
   }
 }
 

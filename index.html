@@ -3,12 +3,12 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>Auk — An Open-Source Foundational Model for Speech Generation and Editing</title>
+    <title>AuK — An Open-Source Foundational Model for Speech Generation and Editing</title>
     <meta
       name="description"
-      content="Auk is an open-source foundational model that unifies speech generation, content editing, paralinguistic editing, acoustic editing, enhancement, and separation behind a single natural-language interface."
+      content="AuK is an open-source foundational model that unifies speech generation, content editing, paralinguistic editing, acoustic editing, enhancement, and separation behind a single natural-language interface."
     />
-    <meta property="og:title" content="Auk — Unified Audio Generation and Editing" />
+    <meta property="og:title" content="AuK — Unified Audio Generation and Editing" />
     <meta property="og:description" content="A single model for every audible transformation." />
     <link rel="icon" href="assets/brand/hunyuan-mark.png" type="image/png" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -27,7 +27,7 @@
         <div class="container is-max-desktop">
           <div class="hero__inner">
             <h1 class="title is-1 publication-title">
-              Auk: An Open-Source Foundational Model for Speech Generation and Editing
+              AuK: An Open-Source Foundational Model for Speech Generation and Editing
             </h1>
 
             <div class="publication-links" id="resource-links"></div>
@@ -37,8 +37,8 @@
                copy now switches between the base model and the distilled one. -->
           <div class="model-panel" id="models">
             <div class="affiliation-row" aria-label="Affiliations">
-              <img src="assets/brand/hunyuan-wordmark.png" alt="Tencent Hunyuan" />
               <img src="assets/brand/sjtu.png" alt="Shanghai Jiao Tong University" />
+              <img src="assets/brand/hunyuan-wordmark.png" alt="Tencent Hunyuan" />
               <img src="assets/brand/sii.jpg" alt="Shanghai Innovation Institution" />
             </div>
 
@@ -52,7 +52,7 @@
                 aria-selected="true"
                 aria-controls="model-pane-auk"
               >
-                Auk
+                AuK
               </button>
               <button
                 type="button"
@@ -63,7 +63,7 @@
                 aria-selected="false"
                 aria-controls="model-pane-flash"
               >
-                Auk-Flash
+                AuK-Flash
               </button>
             </div>
 
@@ -78,14 +78,14 @@
                 <div class="model-pane__copy">
                   <h2 class="model-pane__title">One model for every speech task</h2>
                   <p class="model-pane__body">
-                    Auk is a 1.5B-parameter foundational model that answers a
+                    AuK is a 1.5B-parameter foundational model that answers a
                     natural-language instruction with edited or generated audio. A
                     multimodal language model reads the instruction alongside optional
                     reference audio; a 50 Hz VAE supplies acoustic latents; a hybrid
                     transformer fuses both streams under a flow-matching objective.
                   </p>
                 </div>
-                <div class="model-pane__logo placeholder">&lt;Auk logo&gt;</div>
+                <div class="model-pane__logo placeholder">&lt;AuK logo&gt;</div>
               </div>
             </div>
 
@@ -101,14 +101,14 @@
                 <div class="model-pane__copy">
                   <h2 class="model-pane__title">The same breadth in four steps</h2>
                   <p class="model-pane__body">
-                    Auk-Flash is distilled from Auk in two stages: a trajectory-level
+                    AuK-Flash is distilled from AuK in two stages: a trajectory-level
                     consistency initialization hands a few-step student over to a
                     task-routing decoupled DMD objective, then supervises separation
                     with clean-prediction regression. The result keeps the base
                     model's breadth at 4 steps, with no CFG at inference.
                   </p>
                 </div>
-                <div class="model-pane__logo placeholder">&lt;Auk-Flash logo&gt;</div>
+                <div class="model-pane__logo placeholder">&lt;AuK-Flash logo&gt;</div>
               </div>
             </div>
           </div>
@@ -120,15 +120,15 @@
     <section class="section video-section" id="overview-video">
       <div class="container is-max-desktop">
         <figure class="video-figure">
-          <div class="video-frame" role="img" aria-label="Overview video placeholder">
-            <div class="video-frame__inner">
-              <span class="video-frame__badge">Overview video</span>
-              <span class="video-frame__play" aria-hidden="true">
-                <svg viewBox="0 0 24 24" width="34" height="34"><path fill="currentColor" d="M8 5v14l11-7z"/></svg>
-              </span>
-              <p class="video-frame__slot placeholder">&lt;overview video&gt;</p>
-            </div>
-          </div>
+          <video
+            class="video-player"
+            controls
+            preload="metadata"
+            playsinline
+          >
+            <source src="assets/video/auk-overview.mp4" type="video/mp4" />
+            Your browser does not support the video tag.
+          </video>
         </figure>
       </div>
     </section>
@@ -145,84 +145,33 @@
             <figure class="abstract-figure">
               <img
                 src="assets/figures/auk-capabilities.png"
-                alt="Auk capabilities grouped into five task families."
+                alt="AuK speech generation and editing capabilities grouped into five task families."
               />
+              <figcaption>
+                Speech generation and editing capabilities of AuK.
+              </figcaption>
             </figure>
+
+            <div class="radar-grid">
+              <figure class="radar-figure">
+                <img
+                  src="assets/figures/auk-radar-generation.png"
+                  alt="Radar chart comparing AuK against baselines on speech generation benchmarks."
+                />
+                <figcaption>Generation benchmarks.</figcaption>
+              </figure>
+              <figure class="radar-figure">
+                <img
+                  src="assets/figures/auk-radar-editing.png"
+                  alt="Radar chart comparing AuK against baselines on speech editing benchmarks."
+                />
+                <figcaption>Editing benchmarks.</figcaption>
+              </figure>
+            </div>
           </div>
         </div>
       </div>
     </section>
-
-    <!-- ===== Architecture (left half only) ===== -->
-    <section class="section architecture-section" id="architecture">
-      <div class="container is-max-desktop">
-        <h2 class="title is-3 section-title has-text-centered">Architecture</h2>
-        <figure class="arch-figure arch-figure--left">
-          <div class="arch-figure__viewport">
-            <img
-              src="assets/figures/auk-architecture.png"
-              alt="Auk architecture: MLLM semantic branch and VAE acoustic branch feeding the hybrid transformer and VAE decoder."
-            />
-          </div>
-          <figcaption>
-            <strong>Auk architecture.</strong> The MLLM (top) supplies the
-            semantic condition; the VAE (bottom) supplies the reference acoustic
-            latent and the noisy target latent. Both streams pass through
-            <em>M</em> dual-stream MMDiT blocks, are concatenated, refined by
-            <em>N</em> single-stream DiT blocks, and decoded by the VAE. Frozen
-            modules are marked with snowflakes.
-          </figcaption>
-        </figure>
-
-        <div class="arch-grid">
-          <div class="arch-tile">
-            <h3>MLLM semantic condition</h3>
-            <p>
-              Qwen2.5-Omni encodes the instruction jointly with the optional
-              reference audio. A learnable weighted sum of layer-wise hidden
-              states is layer-normalized to form the semantic condition.
-            </p>
-          </div>
-          <div class="arch-tile">
-            <h3>VAE acoustic latents</h3>
-            <p>
-              A flow-augmented 24 kHz VAE encodes audio to 50 Hz, 64-dim
-              latents.
-            </p>
-          </div>
-          <div class="arch-tile">
-            <h3>Hybrid transformer</h3>
-            <p>
-              30 layers, 1.5B parameters. The first 10 are dual-stream MMDiT
-              blocks with RoPE and stream-specific residuals. The remaining 20
-              are single-stream DiT blocks over the concatenated sequence.
-            </p>
-          </div>
-          <div class="arch-tile">
-            <h3>Pre-training scale</h3>
-            <p>
-              3.03B instruction–audio instances spanning 1.95M hours. 600k
-              updates on 256 H20 GPUs, 32-sample micro-batches.
-            </p>
-          </div>
-        </div>
-
-        <h2 class="title is-3 section-title has-text-centered arch-figure__heading">
-          Pre-training taxonomy
-        </h2>
-        <figure class="arch-figure arch-figure--sunburst">
-          <img
-            src="assets/figures/auk-pretraining-taxonomy.png"
-            alt="Sunburst of Auk pre-training data: five task families expand into instruction-level operations."
-          />
-          <figcaption>
-            The inner ring groups the five task families; the outer rings
-            enumerate the instruction-level operations Auk learns jointly.
-          </figcaption>
-        </figure>
-      </div>
-    </section>
-
     <!-- ===== Demos (capability bar lives under the Demos heading) ===== -->
     <main class="demos" id="demos">
       <div class="container is-max-desktop">
@@ -240,9 +189,9 @@
     <section class="section citation-section" id="citation">
       <div class="container is-max-desktop content">
         <h2 class="title is-3 section-title">Citation</h2>
-        <p>If you use Auk in your research, please cite the technical report:</p>
+        <p>If you use AuK in your research, please cite the technical report:</p>
         <pre class="bibtex-block"><code id="bibtex-code">@misc{&lt;citation key&gt;,
-  title   = {Auk Technical Report: An Open-Source Foundational Model for Speech Generation and Editing},
+  title   = {AuK Technical Report: An Open-Source Foundational Model for Speech Generation and Editing},
   author  = {&lt;authors&gt;},
   year    = {&lt;year&gt;},
   journal = {&lt;venue or arXiv&gt;},

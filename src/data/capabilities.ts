@@ -1,4 +1,4 @@
-// Auk demo content schema & dataset.
+// AuK demo content schema & dataset.
 // 15 speech tasks. Missing metadata stays as `<...>`; missing audio samples
 // use the literal syntax `[audio|<instruction><reference audio description>]`.
 
@@ -563,7 +563,7 @@ export const capabilities: CapabilityFamily[] = [
     id: "acoustic-editing",
     name: "Acoustic Editing",
     tagline: "Fine-grained control of rate, pitch, and loudness",
-    intro: "Auk adjusts the low-level speaking attributes — speed, volume, and pitch.",
+    intro: "AuK adjusts the low-level speaking attributes — speed, volume, and pitch.",
     groups: [
       {
         id: "speed-edit",
@@ -682,7 +682,7 @@ export const headlineStats: { label: string; value: string; note?: string }[] = 
   { label: "Hours of effective audio", value: "1.95M" },
   { label: "Instruction–audio instances", value: "3.03B" },
   { label: "Speech tasks", value: "15" },
-  { label: "Auk-Flash sampling steps", value: "4", note: "4.5× speedup" },
+  { label: "AuK-Flash sampling steps", value: "4", note: "4.5× speedup" },
 ];
 
 export const resourceLinks: { label: string; href: string | null; icon: string }[] = [
