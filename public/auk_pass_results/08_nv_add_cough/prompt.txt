@@ -1,0 +1,16 @@
+任务: nv_add_cough
+分类: 非语言声编辑 Nonverbal Edit
+
+===== PE 前 prompt（原始指令）=====
+在'I knocked at the door'后面加一声咳嗽
+
+===== PE 后 prompt（规范指令 × seeds）=====
+1. 在语音中"I knocked at the door"后插入咳嗽。
+2. 于"I knocked at the door"后添加咳嗽。
+3. 在"I knocked at the door"后增加咳嗽。
+
+输入音频 ASR: I knocked at the door on the ancient side of the building.（en）
+
+任务类型: nonverbal_edit / add_after
+目标时长: 3.26s
+随机种子: 44,45,46

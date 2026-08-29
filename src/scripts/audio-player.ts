@@ -106,11 +106,26 @@ export class AudioPlayer {
         <span class="auk-player__sep">/</span>
         <span class="auk-player__duration">0:00</span>
       </div>
+      <button type="button" class="auk-player__download" title="Download this audio" aria-label="Download this audio">
+        <svg viewBox="0 0 24 24" width="15" height="15" fill="currentColor" aria-hidden="true"><path d="M11 2a1 1 0 1 1 2 0v9.586l2.293-2.293a1 1 0 0 1 1.414 1.414l-4 4a1 1 0 0 1-1.414 0l-4-4a1 1 0 1 1 1.414-1.414L11 11.586V2zM4 15a1 1 0 0 1 1 1v2a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-2a1 1 0 1 1 2 0v2a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4v-2a1 1 0 0 1 1-1z"/></svg>
+      </button>
     `;
     this.root.appendChild(control);
     this.playBtn = control.querySelector(".auk-player__play") as HTMLButtonElement;
     this.timeEl = control.querySelector(".auk-player__elapsed") as HTMLElement;
     this.durationEl = control.querySelector(".auk-player__duration") as HTMLElement;
+    const dlBtn = control.querySelector(".auk-player__download") as HTMLButtonElement;
+    dlBtn.addEventListener("click", () => {
+      const ch = this.current();
+      if (ch?.track.url) {
+        const a = document.createElement("a");
+        a.href = ch.track.url;
+        a.download = ch.track.url.split("/").pop() ?? "audio.wav";
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+      }
+    });
     const statusEl = document.createElement("div");
     statusEl.className = "auk-player__status";
     statusEl.setAttribute("aria-live", "polite");
@@ -281,6 +296,14 @@ export class AudioPlayer {
         btn.setAttribute("aria-selected", i === idx ? "true" : "false");
       });
     }
+    // Let the surrounding card react to a track change (e.g. update the demo
+    // instruction text for multi-output edits).
+    this.root.dispatchEvent(
+      new CustomEvent("auk-track-change", {
+        detail: { index: idx, label: next.track.label, url: next.track.url },
+        bubbles: true,
+      }),
+    );
     // The selected pill already shows which track is live, so a switch needs no
     // status line; `announce` only reaches assistive tech.
     if (announce && this.statusEl) this.statusEl.setAttribute("aria-label", `Playing ${next.track.label}`);

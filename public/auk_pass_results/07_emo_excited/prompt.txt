@@ -1,0 +1,16 @@
+任务: emo_excited
+分类: 情绪编辑 Emotion Edit
+
+===== PE 前 prompt（原始指令）=====
+让他听起来很兴奋
+
+===== PE 后 prompt（规范指令 × seeds）=====
+1. 请将朗读的情感转为兴奋。
+2. 把情感换成兴奋的感觉。
+3. 将这段话重新演绎,情感设为兴奋。
+
+输入音频 ASR: I had faith in them.（en）
+
+任务类型: emotion_edit / None
+目标时长: 1.79s
+随机种子: 44,45,46

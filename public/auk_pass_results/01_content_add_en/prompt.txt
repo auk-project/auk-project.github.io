@@ -1,0 +1,16 @@
+任务: content_add_en
+分类: 内容编辑 Content Edit
+
+===== PE 前 prompt（原始指令）=====
+在这句话开头加上'My dear friends, '，后面的内容保持不变
+
+===== PE 后 prompt（规范指令 × seeds）=====
+1. Add 'My dear friends, ' before 'And so, my fellow Americans, ask not what your country can do for you; ask what you can do for your country.'.
+2. Add 'My dear friends, ' before 'And so, my fellow Americans, ask not what your country can do for you; ask what you can do for your country.'.
+3. Add 'My dear friends, ' before 'And so, my fellow Americans, ask not what your country can do for you; ask what you can do for your country.'.
+
+输入音频 ASR: And so, my fellow Americans, ask not what your country can do for you; ask what you can do for your country.（en）
+
+任务类型: content_edit / insert_before
+目标时长: 11.70s
+随机种子: 44,45,46

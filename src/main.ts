@@ -7,6 +7,7 @@ import {
   type CapabilityFamily,
   type DemoGroup,
   type DemoSample,
+  type InstructionMode,
   type Placeholder,
 } from "./data/capabilities";
 
@@ -17,6 +18,11 @@ const escapeHtml = (s: string) =>
   s.replace(/[&<>"']/g, (c) =>
     ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c] as string),
   );
+
+const modeOf = (g: DemoGroup): InstructionMode => g.instructionMode ?? "always";
+
+/** An input track is the unedited source, so it carries no instruction. */
+const isInputLabel = (label: string) => label.toLowerCase() === "input";
 
 function buildResourceLinks(): void {
   const container = document.getElementById("resource-links");
@@ -118,56 +124,294 @@ function renderGroup(g: DemoGroup): string {
         <h3 class="demo-group__title">${escapeHtml(g.title)}</h3>
         <p class="demo-group__subtitle">${escapeHtml(g.subtitle)}</p>
       </div>
-      <div class="demo-list">${g.samples.map(renderSample).join("\n")}</div>
+      <div class="demo-list">${g.samples.map((s) => renderSample(s, g)).join("\n")}</div>
     </div>
   `;
 }
 
-function renderSample(s: DemoSample): string {
+function renderSample(s: DemoSample, g: DemoGroup): string {
   if (isPlaceholder(s.audio)) {
     return `
       <article class="demo-card placeholder-card" data-sample-id="${escapeHtml(s.id)}">
-        <p class="demo-card__instruction"><span class="demo-card__instruction-label">Instruction:</span> ${escapeHtml(s.instruction)}</p>
+        ${renderInstructionRow(s, g, escapeHtml(s.instruction))}
         <p class="placeholder-text">${escapeHtml(s.audio.text)}</p>
       </article>
     `;
   }
-  return renderReal(s);
+  return renderReal(s, g);
 }
 
-function renderReal(s: DemoSample): string {
+function renderReal(s: DemoSample, g: DemoGroup): string {
   const audio = s.audio as { src?: string; out?: string; outs?: { label: string; url: string }[] };
   if (audio.outs && audio.outs.length > 0 && audio.src) {
-    return renderSlider(s, audio.src, audio.outs);
+    // nv comes first: its emoji labels can overlap the emotion set (e.g. 😐).
+    if (s.nvInstructions) {
+      return renderNv(s, g, audio.src, audio.outs);
+    }
+    if (audio.outs.some((o) => /^[😄😡😭😱😐]/u.test(o.label))) {
+      return renderEmotion(s, g, audio.src, audio.outs);
+    }
+    if (s.separateInstructions) {
+      return renderSeparate(s, g, audio.src, audio.outs);
+    }
+    return renderSlider(s, g, audio.src, audio.outs);
   }
-  return renderPair(s, audio.src, audio.out);
+  return renderPair(s, g, audio.src, audio.out);
 }
 
-function renderPair(s: DemoSample, src?: string, out?: string): string {
-  const tracks: { url: string; label: string; side?: "a" | "b" }[] = [];
-  if (src) tracks.push({ url: src, label: "Input", side: "a" });
-  if (out) tracks.push({ url: out, label: "Output", side: "b" });
-  // Every editing card exposes an Input/Output switch. Cards with a source but
-  // no generated output yet show the source on both sides — the switch still
-  // works, and the output track is a placeholder to be replaced later.
-  if (src && !out && tracks.length === 1) {
-    tracks.push({ url: src, label: "Output", side: "b" });
-  }
-  const cfg = JSON.stringify({ tracks }).replace(/'/g, "&#39;");
+// The instruction row, or nothing at all when the group opts out. Every card
+// now shows its input alongside its output, so the instruction always describes
+// a real edit and never needs hiding.
+function renderInstructionRow(
+  s: DemoSample,
+  g: DemoGroup,
+  innerHtml: string,
+  innerClass?: string,
+): string {
+  if (modeOf(g) === "none") return "";
+  const body = innerClass ? `<span class="${innerClass}">${innerHtml}</span>` : innerHtml;
+  return `<p class="demo-card__instruction"><span class="demo-card__instruction-label">Instruction:</span> ${body}</p>`;
+}
+
+/** The input row: a labelled, single-track player above the output row. */
+function renderInputRow(url: string): string {
+  const cfg = JSON.stringify({ tracks: [{ url, label: "Input" }] }).replace(/'/g, "&#39;");
   return `
-    <article class="demo-card" data-sample-id="${escapeHtml(s.id)}">
-      <p class="demo-card__instruction"><span class="demo-card__instruction-label">Instruction:</span> ${escapeHtml(s.instruction)}</p>
-      <div class="auk-player-mount" data-auk-player='${cfg}'></div>
+      <div class="auk-stack__row">
+        <span class="auk-stack__label">Input</span>
+        <div class="auk-player-mount" data-auk-player='${cfg}'></div>
+      </div>`;
+}
+
+/** The output row, carrying whatever switch the card needs in its own header. */
+function renderOutputRow(tracks: { url: string; label: string }[], dataAttrs = ""): string {
+  const cfg = JSON.stringify({
+    tracks: tracks.map((o, i) => ({
+      ...o,
+      side: (i === 0 ? "a" : i === 1 ? "b" : undefined) as "a" | "b" | undefined,
+    })),
+  }).replace(/'/g, "&#39;");
+  return `
+      <div class="auk-stack__row">
+        <span class="auk-stack__label">Output</span>
+        <div class="auk-player-mount" data-auk-player='${cfg}'${dataAttrs}></div>
+      </div>`;
+}
+
+// Content-editing and nonverbal-edit cards stack the input above the output and
+// put one button per edit operation in the output row's switch, so the edit can
+// be heard against the source without switching away from it.
+function renderNv(s: DemoSample, g: DemoGroup, src: string, outs: { label: string; url: string }[]): string {
+  // The input has its own row now, so it is dropped from the output switch.
+  const outputs = outs.filter((o) => !isInputLabel(o.label));
+  let map: Record<string, string> = {};
+  try {
+    map = JSON.parse(s.nvInstructions ?? "{}") as Record<string, string>;
+  } catch {
+    map = {};
+  }
+  const firstLabel = outputs[0]?.label ?? "";
+  const firstInstr = map[firstLabel] ?? s.instruction;
+  const attrs = ` data-nv-instr='${escapeHtml(s.nvInstructions ?? "{}")}' data-nv-marks='${escapeHtml(s.transcriptMarks ?? "{}")}'`;
+  return `
+    <article class="demo-card demo-card--stack" data-sample-id="${escapeHtml(s.id)}" data-nv>
+      ${renderInstructionRow(s, g, escapeHtml(firstInstr), "auk-nv__instr")}
+      ${renderTranscriptBlock(s, firstLabel)}
+      ${renderInputRow(src)}
+      ${renderOutputRow(outputs, attrs)}
     </article>
   `;
 }
 
+// Separate-speech cards stack the input waveform above the output waveform, so
+// the separation can be judged by comparing the two shapes side by side rather
+// than by switching one player back and forth. The output player carries the
+// two extraction modes (by content / by speaking order) in its own switch.
+function renderSeparate(s: DemoSample, g: DemoGroup, src: string, outs: { label: string; url: string }[]): string {
+  const outputs = outs
+    .filter((o) => !isInputLabel(o.label))
+    .map((o) => ({
+      url: o.url,
+      label: o.label.startsWith("Output1") ? "Output1" : o.label.startsWith("Output2") ? "Output2" : o.label,
+    }));
+  const ins = s.separateInstructions!;
+  const attrs = ` data-separate-instr='${escapeHtml(JSON.stringify(ins))}'`;
+  return `
+    <article class="demo-card demo-card--stack" data-sample-id="${escapeHtml(s.id)}" data-separate>
+      ${renderInstructionRow(s, g, escapeHtml(ins.content), "auk-separate__instr")}
+      ${renderTranscriptBlock(s, "Input")}
+      ${renderInputRow(src)}
+      ${renderOutputRow(outputs, attrs)}
+    </article>
+  `;
+}
+
+// Emotion labels carry the emoji and the emotion key, e.g. "😄 happy".
+// The instruction template uses "<emotion>" as a placeholder that resolves to
+// the selected emotion's name at render time.
+const EMOTION_EN: Record<string, string> = { happy: "happy", angry: "angry", sad: "sad", afraid: "afraid", calm: "calm" };
+
+function renderEmotion(s: DemoSample, g: DemoGroup, src: string, outs: { label: string; url: string }[]): string {
+  const stops = outs.map((o, i) => ({ idx: i, label: o.label, url: o.url }));
+  const keyOf = (label: string) => label.split(/\s+/)[1] ?? "";
+  // `defaultEmotion` names the emotion the source clip already carries, so that
+  // stop replays the input. The card now shows the input on its own row, so the
+  // slider opens on a real edit instead — the stop furthest from the source, to
+  // make the contrast between the two waveforms as audible as possible.
+  const sourceIdx = s.defaultEmotion
+    ? stops.findIndex((o) => keyOf(o.label) === s.defaultEmotion)
+    : stops.findIndex((o) => o.url === src);
+  const resolvedIdx =
+    sourceIdx >= 0
+      ? stops.reduce((best, o) => {
+          if (o.url === src) return best;
+          return Math.abs(o.idx - sourceIdx) > Math.abs(best - sourceIdx) ? o.idx : best;
+        }, stops.find((o) => o.url !== src)?.idx ?? 0)
+      : 0;
+  const cfgJson = JSON.stringify({ emotion: { lang: s.lang, src, stops, defaultIdx: resolvedIdx } }).replace(/'/g, "&#39;");
+
+  const pct = (i: number) => (stops.length > 1 ? (i / (stops.length - 1)) * 100 : 0);
+
+  const emojiOf = (label: string) => label.split(/\s+/)[0] ?? "😐";
+  const nameOf = (label: string) => {
+    const key = label.split(/\s+/)[1] ?? "";
+    return EMOTION_EN[key] ?? key;
+  };
+
+  const stopsHtml = stops
+    .map(
+      (o, i) =>
+        `<button type="button" class="auk-slider__stop auk-emotion__stop" data-idx="${i}" style="left:${pct(i)}%" aria-pressed="${
+          i === resolvedIdx ? "true" : "false"
+        }" title="${escapeHtml(o.label)}"><span class="auk-emotion__emoji">${escapeHtml(emojiOf(o.label))}</span></button>`,
+    )
+    .join("");
+
+  const firstUrl = stops[resolvedIdx]?.url ?? src;
+
+  // One stop points back at the source clip — the input already carries that
+  // emotion — so it is labelled as the source rather than as an edit.
+  const instructionFor = (idx: number) =>
+    stops[idx]?.url === src
+      ? "The input already has this emotion — no edit applied"
+      : s.instruction.replace(/<emotion>/g, nameOf(stops[idx]?.label ?? ""));
+
+  return `
+    <article class="demo-card demo-card--stack" data-sample-id="${escapeHtml(s.id)}" data-emotion>
+      ${renderInstructionRow(s, g, escapeHtml(instructionFor(resolvedIdx)), "auk-emotion__instr")}
+      <div class="auk-slider auk-emotion" data-auk-emotion='${cfgJson}' data-emo-src='${escapeHtml(src)}' data-instr-template='${escapeHtml(s.instruction)}'>
+        <div class="auk-slider__labels">${stopsHtml}</div>
+        <div class="auk-slider__rail" role="slider" tabindex="0" aria-label="Emotion edit — drag to change the emotion" aria-valuemin="0" aria-valuemax="${stops.length - 1}" aria-valuenow="${resolvedIdx}">
+          <div class="auk-slider__fill"></div>
+          <div class="auk-slider__thumb" style="left: ${pct(resolvedIdx)}%"></div>
+        </div>
+      </div>
+      ${renderInputRow(src)}
+      ${renderOutputRow([{ url: firstUrl, label: "Output" }])}
+    </article>
+  `;
+}
+
+function renderPair(s: DemoSample, g: DemoGroup, src?: string, out?: string): string {
+  // A group whose text is folded into the instruction needs no separate quoted
+  // block; otherwise the transcript is shown when it is real (not a `<...>`).
+  const hasTr = !g.inlineTranscript && s.transcript?.trim() && !s.transcript!.trim().startsWith("<");
+  const instrRow = renderInstructionRow(s, g, renderInstruction(s, g));
+  const trBlock = hasTr ? renderTranscriptBlock(s, "Output") : "";
+
+  // A generated-only card (text-to-speech) has no source to compare against, so
+  // it stays a single player rather than an empty Input row.
+  if (!src) {
+    const cfg = JSON.stringify({ tracks: [{ url: out ?? "", label: "Output" }] }).replace(/'/g, "&#39;");
+    return `
+    <article class="demo-card" data-sample-id="${escapeHtml(s.id)}">
+      ${instrRow}
+      ${trBlock}
+      <div class="auk-player-mount" data-auk-player='${cfg}'></div>
+    </article>
+  `;
+  }
+  // Input and output are both on screen, so the pair needs no A/B switch: the
+  // output row simply carries the single generated track (or the source again
+  // when no output exists yet).
+  return `
+    <article class="demo-card demo-card--stack" data-sample-id="${escapeHtml(s.id)}">
+      ${instrRow}
+      ${trBlock}
+      ${renderInputRow(src)}
+      ${renderOutputRow([{ url: out ?? src, label: "Output" }])}
+    </article>
+  `;
+}
+
+// For a text-to-speech group the spoken text *is* the request, so it is folded
+// into the instruction as a quoted clause instead of standing alone in its own
+// block. A `<...>` value is still an unfilled placeholder, so it is dropped.
+function renderInstruction(s: DemoSample, g: DemoGroup): string {
+  const t = s.transcript?.trim();
+  const shown = t && !t.startsWith("<") ? t : "";
+  if (g.inlineTranscript && shown) {
+    const joiner = g.transcriptConnector ?? ": ";
+    return `${escapeHtml(s.instruction)}${escapeHtml(joiner)}“${escapeHtml(shown)}”`;
+  }
+  return escapeHtml(s.instruction);
+}
+
+// Build the transcript with the active operation's annotations:
+// deleted spans get a red strike, added spans a green background, replaced
+// spans show the old words struck in blue followed by the new words in blue.
+function renderTranscriptMarked(transcript: string, marks?: { add?: string[] | { text: string; after?: string; before?: string }[]; delete?: string[]; change?: { from: string; to: string }[] }): string {
+  let html = escapeHtml(transcript);
+  if (!marks) return html;
+  const del = (text: string) => `<mark class="tr-del">${escapeHtml(text)}</mark>`;
+  const add = (text: string) => `<mark class="tr-add">${escapeHtml(text)}</mark>`;
+  const chg = (from: string, to: string) => `<mark class="tr-chg"><s>${escapeHtml(from)}</s> → ${escapeHtml(to)}</mark>`;
+  const sortByLen = (arr: string[]) => arr.slice().sort((a, b) => b.length - a.length);
+  // Match against the escaped text, so apostrophes etc. in the transcript line
+  // up with the escaped marks (`'` → `&#39;`).
+  const esc = escapeHtml;
+  for (const c of (marks.change ?? []).slice().sort((a, b) => b.from.length - a.from.length)) {
+    html = html.split(esc(c.from)).join(chg(c.from, c.to));
+  }
+  for (const d of sortByLen(marks.delete ?? [])) {
+    html = html.split(esc(d)).join(del(d));
+  }
+  // Adds may be anchored: { text, after } inserts the green span right after
+  // `after`; { text, before } right before `before`; a bare string is appended.
+  for (const a of marks.add ?? []) {
+    const ins = typeof a === "string" ? { text: a } : a;
+    if (ins.before && html.includes(esc(ins.before))) {
+      html = html.split(esc(ins.before)).join(add(ins.text) + esc(ins.before));
+    } else if (ins.after && html.includes(esc(ins.after))) {
+      html = html.split(esc(ins.after)).join(esc(ins.after) + add(ins.text));
+    } else {
+      html += add(ins.text);
+    }
+  }
+  return html;
+}
+
+// The transcript block under a card, annotated for the currently selected
+// output label. Returns "" for samples without a real transcript.
+function renderTranscriptBlock(s: DemoSample, label: string): string {
+  const t = s.transcript?.trim();
+  if (!t || t.startsWith("<")) return "";
+  let marks: { add?: string[] | { text: string; after?: string; before?: string }[]; delete?: string[]; change?: { from: string; to: string }[] } | undefined;
+  try {
+    const all = JSON.parse(s.transcriptMarks ?? "{}") as Record<string, { add?: string[] | { text: string; after?: string; before?: string }[]; delete?: string[]; change?: { from: string; to: string }[] }>;
+    marks = all[label];
+  } catch {
+    marks = undefined;
+  }
+  return `<p class="demo-card__transcript" data-tr-label="${escapeHtml(label)}" data-raw="${escapeHtml(t)}">${renderTranscriptMarked(t, marks)}</p>`;
+}
+
 const SOURCE_STOP = /\(\s*source\s*\)/i;
 
-function renderSlider(s: DemoSample, src: string, outs: { label: string; url: string }[]): string {
+function renderSlider(s: DemoSample, g: DemoGroup, src: string, outs: { label: string; url: string }[]): string {
   const stops = outs.map((o, i) => ({ idx: i, label: o.label, url: o.url }));
   const resolvedIdx = resolvedDefault(stops);
-  const cfgJson = JSON.stringify({ slider: { src, stops, defaultIdx: resolvedIdx } }).replace(/'/g, "&#39;");
+  const cfgJson = JSON.stringify({ slider: { stops, defaultIdx: resolvedIdx } }).replace(/'/g, "&#39;");
 
   const pct = (i: number) => (stops.length > 1 ? (i / (stops.length - 1)) * 100 : 0);
   // The "(source)" suffix is dropped from the visible tick label — it would
@@ -193,26 +437,20 @@ function renderSlider(s: DemoSample, src: string, outs: { label: string; url: st
     sourceIdx >= 0 ? `<span class="auk-slider__source" style="left:${pct(sourceIdx)}%">source</span>` : "";
 
   const firstUrl = stops[resolvedIdx]?.url ?? src;
-  // The player exposes Input/Output like every other card: the input side is
-  // always the source track, the output side follows the selected slider stop.
-  const playerCfg = JSON.stringify({
-    tracks: [
-      { url: src, label: "Input", side: "a" },
-      { url: firstUrl, label: "Output", side: "b" },
-    ],
-  }).replace(/'/g, "&#39;");
   return `
-    <article class="demo-card" data-sample-id="${escapeHtml(s.id)}" data-slider>
+    <article class="demo-card demo-card--stack" data-sample-id="${escapeHtml(s.id)}" data-slider>
+      ${renderInstructionRow(s, g, escapeHtml(s.instruction))}
       <div class="auk-slider" data-auk-slider='${cfgJson}'>
         <div class="auk-slider__labels">${stopsHtml}</div>
-        <div class="auk-slider__rail" role="slider" tabindex="0" aria-label="${escapeHtml(s.instruction)} — drag to change the output" aria-valuemin="0" aria-valuemax="${stops.length - 1}" aria-valuenow="${resolvedIdx}">
+        <div class="auk-slider__rail" role="slider" tabindex="0" aria-label="${escapeHtml(s.instruction || s.label)} — drag to change the output" aria-valuemin="0" aria-valuemax="${stops.length - 1}" aria-valuenow="${resolvedIdx}">
           <div class="auk-slider__ticks">${ticksHtml}</div>
           <div class="auk-slider__fill"></div>
           <div class="auk-slider__thumb" style="left: ${pct(resolvedIdx)}%"></div>
         </div>
         <div class="auk-slider__foot">${sourceTag}</div>
       </div>
-      <div class="auk-player-mount" data-auk-player='${playerCfg}'></div>
+      ${renderInputRow(src)}
+      ${renderOutputRow([{ url: firstUrl, label: "Output" }])}
     </article>
   `;
 }
@@ -247,13 +485,19 @@ function attachBibtexCopy(): void {
 function attachSliderLogic(): void {
   document.querySelectorAll<HTMLElement>(".auk-slider").forEach((slider) => {
     let stops: { idx: number; label: string; url: string }[] = [];
-    let srcUrl = "";
+    let isEmotion = false;
+    let emoDefault = 0;
+    let emoSrc = "";
     try {
-      const parsed = JSON.parse(slider.dataset.aukSlider || "{}") as {
-        slider?: { src?: string; stops?: { idx: number; label: string; url: string }[] };
+      const raw = slider.dataset.aukSlider ?? slider.dataset.aukEmotion ?? "{}";
+      isEmotion = "aukEmotion" in slider.dataset;
+      const parsed = JSON.parse(raw) as {
+        slider?: { stops?: { idx: number; label: string; url: string }[] };
+        emotion?: { lang?: string; src?: string; stops?: { idx: number; label: string; url: string }[]; defaultIdx?: number };
       };
-      stops = parsed.slider?.stops ?? [];
-      srcUrl = parsed.slider?.src ?? "";
+      stops = (isEmotion ? parsed.emotion?.stops : parsed.slider?.stops) ?? [];
+      emoDefault = parsed.emotion?.defaultIdx ?? 0;
+      emoSrc = parsed.emotion?.src ?? "";
     } catch {
       return;
     }
@@ -261,24 +505,28 @@ function attachSliderLogic(): void {
     const rail = slider.querySelector<HTMLElement>(".auk-slider__rail");
     const fill = slider.querySelector<HTMLElement>(".auk-slider__fill");
     const thumb = slider.querySelector<HTMLElement>(".auk-slider__thumb");
-    const card = slider.closest<HTMLElement>(".demo-card[data-slider]");
-    const mount = card?.querySelector<HTMLElement>(".auk-player-mount");
+    const card = slider.closest<HTMLElement>(".demo-card[data-slider], .demo-card[data-emotion]");
+    const instrEl = card?.querySelector<HTMLElement>(".auk-emotion__instr");
+    const template = slider.dataset.instrTemplate ?? "";
     let currentIdx = 0;
 
     const rebuildPlayer = (idx: number) => {
       const stop = stops[idx];
-      if (!stop || !mount || !card) return;
+      if (!stop || !card) return;
+      // Re-query every time: the previous rebuild replaced the node, so a
+      // reference captured earlier would be detached from the document. The
+      // input row is fixed, so only the output row's player is rebuilt.
+      const rows = card.querySelectorAll<HTMLElement>(".auk-stack__row");
+      const outRow = rows[rows.length - 1];
+      const current = outRow?.querySelector<HTMLElement>(".auk-player-mount");
+      if (!current) return;
       const cfg = JSON.stringify({
-        tracks: [
-          { url: srcUrl, label: "Input", side: "a" },
-          { url: stop.url, label: "Output", side: "b" },
-        ],
+        tracks: [{ url: stop.url, label: "Output" }],
       }).replace(/'/g, "&#39;");
       const fresh = document.createElement("div");
       fresh.className = "auk-player-mount";
       fresh.dataset.aukPlayer = cfg;
-      fresh.dataset.aukPlayerMounted = "";
-      mount.replaceWith(fresh);
+      current.replaceWith(fresh);
       import("./scripts/audio-player").then((m) => {
         (m as { mountAllAudioPlayers: () => void }).mountAllAudioPlayers();
       });
@@ -293,6 +541,14 @@ function attachSliderLogic(): void {
       slider.querySelectorAll<HTMLButtonElement>(".auk-slider__stop").forEach((b, i) => {
         b.setAttribute("aria-pressed", i === idx ? "true" : "false");
       });
+      if (isEmotion && instrEl) {
+        const stop = stops[idx];
+        const key = (stop?.label ?? "").split(/\s+/)[1] ?? "";
+        const isSource = !!stop && !!emoSrc && stop.url === emoSrc;
+        instrEl.textContent = isSource
+          ? "The input already has this emotion — no edit applied"
+          : template.replace(/<emotion>/g, EMOTION_EN[key] ?? key);
+      }
     };
 
     const idxFromEvent = (clientX: number): number => {
@@ -346,21 +602,17 @@ function attachSliderLogic(): void {
       });
     });
 
-    render(resolvedDefault(stops));
+    render(isEmotion ? emoDefault : resolvedDefault(stops));
   });
 }
 
+// The card shows the source on its own Input row, so the slider opens one stop
+// past the source rather than on it — otherwise both rows would play the same
+// clip and the edit would look like a no-op.
 function resolvedDefault(stops: { idx: number; label: string; url: string }[]): number {
-  const found = stops.findIndex((x) => SOURCE_STOP.test(x.label));
-  return found >= 0 ? found : Math.floor((stops.length - 1) / 2);
-}
-
-function ensurePlaceholderTokens(): void {
-  const text = document.body.textContent ?? "";
-  const okAudio = text.includes("[audio|<instruction><reference audio description>]");
-  if (!okAudio) {
-    console.warn("AuK demo page: placeholder syntax not detected.");
-  }
+  const source = stops.findIndex((x) => SOURCE_STOP.test(x.label));
+  if (source < 0) return Math.floor((stops.length - 1) / 2);
+  return source + 1 < stops.length ? source + 1 : Math.max(0, source - 1);
 }
 
 function attachModelTabs(): void {
@@ -385,6 +637,69 @@ function attachModelTabs(): void {
   });
 }
 
+function attachTrackSwitches(): void {
+  // Generic rule for every card: re-annotate the transcript for the newly
+  // selected output. The instruction row is never hidden — the input has its
+  // own row, so the switch only ever moves between real outputs.
+  document.querySelectorAll<HTMLElement>(".demo-card").forEach((card) => {
+    card.addEventListener("auk-track-change", (e) => {
+      const ev = e as CustomEvent<{ label: string }>;
+      const label = ev.detail.label;
+      const trEl = card.querySelector<HTMLElement>(".demo-card__transcript");
+      const mount = card.querySelector<HTMLElement>(".auk-player-mount[data-nv-marks]");
+      if (trEl && mount) {
+        let marks: Record<string, { add?: string[] | { text: string; after?: string; before?: string }[]; delete?: string[]; change?: { from: string; to: string }[] }> = {};
+        try {
+          marks = JSON.parse(mount.dataset.nvMarks || "{}") as typeof marks;
+        } catch {
+          marks = {};
+        }
+        trEl.dataset.trLabel = label;
+        // Always re-mark from the raw text, so successive switches don't stack
+        // highlight tags onto already-tagged markup.
+        trEl.innerHTML = renderTranscriptMarked(trEl.dataset.raw ?? "", marks[label]);
+      }
+    });
+  });
+
+  // Separate-speech: the output player's switch picks the extraction mode, so
+  // the instruction follows it. The input waveform above it never changes.
+  document.querySelectorAll<HTMLElement>(".demo-card[data-separate]").forEach((card) => {
+    card.addEventListener("auk-track-change", (e) => {
+      const ev = e as CustomEvent<{ label: string }>;
+      const instrEl = card.querySelector<HTMLElement>(".auk-separate__instr");
+      const mount = card.querySelector<HTMLElement>(".auk-player-mount[data-separate-instr]");
+      if (!instrEl || !mount) return;
+      let ins: { content: string; number: string } | null = null;
+      try {
+        ins = JSON.parse(mount.dataset.separateInstr || "null");
+      } catch {
+        return;
+      }
+      if (!ins) return;
+      const label = ev.detail.label;
+      instrEl.textContent = label === "Output2" ? ins.number : ins.content;
+    });
+  });
+
+  document.querySelectorAll<HTMLElement>(".demo-card[data-nv]").forEach((card) => {
+    card.addEventListener("auk-track-change", (e) => {
+      const ev = e as CustomEvent<{ label: string }>;
+      const label = ev.detail.label;
+      const instrEl = card.querySelector<HTMLElement>(".auk-nv__instr");
+      const mount = card.querySelector<HTMLElement>(".auk-player-mount[data-nv-instr]");
+      if (!instrEl || !mount) return;
+      let map: Record<string, string> = {};
+      try {
+        map = JSON.parse(mount.dataset.nvInstr || "{}") as Record<string, string>;
+      } catch {
+        return;
+      }
+      instrEl.textContent = map[label] ?? "";
+    });
+  });
+}
+
 function init(): void {
   buildResourceLinks();
   // Demos must exist before the rail runs: the rail hides every family but the
@@ -395,7 +710,7 @@ function init(): void {
   attachBibtexCopy();
   attachSliderLogic();
   mountAllAudioPlayers();
-  ensurePlaceholderTokens();
+  attachTrackSwitches();
   window.addEventListener("resize", redrawAllPlayers);
 }
 

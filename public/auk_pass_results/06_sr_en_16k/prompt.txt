@@ -1,0 +1,16 @@
+任务: sr_en_16k
+分类: 语音超分 Super-Resolution
+
+===== PE 前 prompt（原始指令）=====
+The audio sounds like a phone call. Improve the clarity and quality.
+
+===== PE 后 prompt（规范指令 × seeds）=====
+1. This audio suffers from limited bandwidth. Please restore it to a wideband, clear-sounding speech, and meanwhile denoise the audio.
+2. This audio suffers from limited bandwidth. Please restore it to a wideband, clear-sounding speech, and meanwhile denoise the audio.
+3. This audio suffers from limited bandwidth. Please restore it to a wideband, clear-sounding speech.
+
+输入音频 ASR: How do you get it back?（en）
+
+任务类型: improve_quality / bandwidth_extension
+目标时长: 2.60s
+随机种子: 44,45,46

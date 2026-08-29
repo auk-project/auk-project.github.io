@@ -1,0 +1,16 @@
+任务: speed_en_down
+分类: 语速调整 Speed Edit
+
+===== PE 前 prompt（原始指令）=====
+说太快了，慢一点
+
+===== PE 后 prompt（规范指令 × seeds）=====
+1. 将语速放缓到原速的0.75倍,谢谢。
+2. 将这段话的语速减速到0.75x。
+3. 把说话的速度放慢到0.75倍。
+
+输入音频 ASR: And so my fellow Americans, ask not what your country can do for you, ask what you can do for your country.（en）
+
+任务类型: speed_edit / None
+目标时长: 13.73s
+随机种子: 44,45,46

@@ -1,0 +1,16 @@
+任务: content_del_en
+分类: 内容编辑 Content Edit
+
+===== PE 前 prompt（原始指令）=====
+把'I knocked at the door on the ancient side of the building.'里的'ancient'删掉
+
+===== PE 后 prompt（规范指令 × seeds）=====
+1. Remove 'ancient'.
+2. Remove 'ancient'.
+3. Remove 'ancient'.
+
+输入音频 ASR: I knocked at the door on the ancient side of the building.（en）
+
+任务类型: content_edit / delete
+目标时长: 2.58s
+随机种子: 44,45,46

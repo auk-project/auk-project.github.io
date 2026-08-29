@@ -1,0 +1,16 @@
+任务: ss_order_en
+分类: 说话人分离 Speaker Separation
+
+===== PE 前 prompt（原始指令）=====
+This audio has two speakers one after another. Keep ONLY the first speaker who speaks first, remove the second speaker completely. Output one clean single-speaker voice.
+
+===== PE 后 prompt（规范指令 × seeds）=====
+1. Please keep the first speaker to start talking and remove the other speakers, outputting a single clean speech track.
+2. Please extract the first speaker to start talking from this input speech and keep only this person's voice; remove all other speakers.
+3. In this audio, please keep only the speech of the first speaker and drop the rest of the speakers.
+
+输入音频 ASR: Shall I never miss home, talk and blessing, and the common kiss that comes to each in turn? Nor Hilda watched him from the corner, trembling and scarcely breathing, dark shadows growing about her eyes. It.（en）
+
+任务类型: separate_speech / by_order
+目标时长: 15.10s
+随机种子: 51,52,53

@@ -1,0 +1,16 @@
+任务: speed_en_up
+分类: 语速调整 Speed Edit
+
+===== PE 前 prompt（原始指令）=====
+语速加快一点，说得快一些
+
+===== PE 后 prompt（规范指令 × seeds）=====
+1. 将语速加快到原速的1.25倍,谢谢。
+2. 将这段话的语速加速至1.25x。
+3. 把说话的速度加快到1.25倍。
+
+输入音频 ASR: I knocked at the door on the ancient side of the building.（en）
+
+任务类型: speed_edit / None
+目标时长: 2.25s
+随机种子: 44,45,46

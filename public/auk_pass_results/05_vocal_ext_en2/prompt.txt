@@ -1,0 +1,16 @@
+任务: vocal_ext_en2
+分类: 提取人声 Vocal Extraction
+
+===== PE 前 prompt（原始指令）=====
+把伴奏去掉，只保留人声
+
+===== PE 后 prompt（规范指令 × seeds）=====
+1. 只保留人声内容，说话、唱歌，其余声音全都不要。
+2. 请把所有人声都留下，不论是说还是唱；其它都去掉。
+3. 把所有人发出的声音，说话与唱歌，都留下，其它一概不要。
+
+输入音频 ASR: She looked just like a movie star. She's ten out of ten, schoolboy fascination.（en）
+
+任务类型: extract_vocals / all_human_voices
+目标时长: 10.00s
+随机种子: 44,45,46

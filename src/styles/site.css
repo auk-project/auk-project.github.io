@@ -485,9 +485,10 @@ button {
   background: var(--bg-card);
 }
 .radar-figure figcaption {
-  margin: 0.7rem auto 0;
-  color: var(--ink-faint);
-  font-size: 0.85rem;
+  margin: 1rem auto 0;
+  color: var(--ink-soft);
+  font-size: var(--fs-lede);
+  line-height: 1.65;
 }
 @media (min-width: 768px) {
   .radar-grid {
@@ -631,6 +632,7 @@ button {
   align-self: center;
 }
 .demo-card > .placeholder-text,
+.demo-card > .demo-card__transcript,
 .demo-card > .auk-slider {
   grid-column: 1 / -1;
 }
@@ -654,6 +656,50 @@ button {
 .demo-card > .auk-player--single {
   grid-column: 1 / -1;
 }
+
+/* Stacked card (separate-speech): the input waveform sits directly above the
+   output waveform so the separation can be judged by comparing the two shapes,
+   rather than by switching one player back and forth. Each row is its own grid
+   so the row's A/B switch still lands top-right beside its label. */
+.demo-card--stack > .auk-stack__row {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.35rem 1rem;
+}
+.auk-stack__label {
+  grid-column: 1;
+  grid-row: 1;
+  font-family: var(--font-display);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+.auk-stack__row > .auk-player--ab {
+  display: contents;
+}
+.auk-stack__row > .auk-player--ab > .auk-player__ab {
+  grid-column: 2;
+  grid-row: 1;
+  align-self: center;
+}
+.auk-stack__row > .auk-player--ab > .auk-player__control,
+.auk-stack__row > .auk-player--single {
+  grid-column: 1 / -1;
+  grid-row: 2;
+}
+.auk-stack__row > .auk-player--ab > .auk-player__tracks,
+.auk-stack__row > .auk-player--ab > .auk-player__status {
+  display: none;
+}
+/* The input row has no switch of its own, so its label and waveform stack
+   without a reserved second column. */
+.auk-stack__row > .auk-player--single > .auk-player__status {
+  display: none;
+}
 .demo-card__instruction {
   margin: 0;
   font-family: var(--font-mono);
@@ -661,6 +707,42 @@ button {
   font-size: 0.9rem;
   line-height: 1.55;
   word-break: break-word;
+}
+/* The target text the model speaks — quoted, so it reads as content rather
+   than as part of the instruction above it. */
+.demo-card__transcript {
+  margin: 0;
+  padding-left: 0.75rem;
+  border-left: 2px solid var(--brand-pale);
+  color: var(--ink-soft);
+  font-size: 0.9rem;
+  line-height: 1.6;
+  word-break: break-word;
+}
+/* Annotated spans in the transcript: deleted (red strike), added (green),
+   replaced (blue, old struck through). */
+.demo-card__transcript mark {
+  padding: 0 0.15em;
+  border-radius: 3px;
+}
+.demo-card__transcript .tr-del {
+  background: rgba(229, 72, 77, 0.14);
+  color: #b3261e;
+  text-decoration: line-through;
+  text-decoration-color: #b3261e;
+}
+.demo-card__transcript .tr-add {
+  background: rgba(52, 168, 83, 0.16);
+  color: #1e7a34;
+}
+.demo-card__transcript .tr-chg {
+  background: rgba(0, 85, 233, 0.12);
+  color: var(--brand-blue);
+}
+.demo-card__transcript .tr-chg s {
+  color: #b3261e;
+  text-decoration-color: #b3261e;
+  text-decoration-thickness: 1.5px;
 }
 .demo-card__instruction-label {
   color: var(--accent-deep);
@@ -772,6 +854,26 @@ button {
 .auk-player__sep {
   color: var(--ink-faint);
 }
+.auk-player__download {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 25px;
+  height: 23px;
+  padding: 0;
+  margin-left: 0.35rem;
+  background: transparent;
+  border: 1px solid var(--rule);
+  border-radius: 6px;
+  color: var(--ink-soft);
+  cursor: pointer;
+  transition: color 120ms ease, border-color 120ms ease;
+}
+.auk-player__download:hover {
+  color: var(--brand-blue);
+  border-color: var(--brand-cyan);
+}
 .auk-player__ab {
   display: flex;
   gap: 0.4rem;
@@ -822,6 +924,37 @@ button {
   position: relative;
   height: 1.05rem;
   margin-bottom: 0.5rem;
+}
+/* Nonverbal-edit instruction can be long; let it wrap inside the card. */
+.auk-nv__instr,
+.auk-separate__instr {
+  word-break: break-word;
+}
+
+/* Emotion slider: the stops are large emoji sitting above the rail. */
+.auk-emotion .auk-slider__labels {
+  height: 2.4rem;
+  margin-bottom: 0.3rem;
+}
+.auk-emotion__stop {
+  font-size: 0;
+}
+.auk-emotion__emoji {
+  display: inline-block;
+  font-size: 1.7rem;
+  line-height: 1;
+  filter: grayscale(0.6);
+  opacity: 0.55;
+  transition: filter 150ms ease, opacity 150ms ease, transform 150ms ease;
+}
+.auk-emotion__stop[aria-pressed="true"] .auk-emotion__emoji {
+  filter: grayscale(0);
+  opacity: 1;
+  transform: scale(1.25);
+}
+.auk-emotion__stop:hover .auk-emotion__emoji {
+  filter: grayscale(0);
+  opacity: 0.9;
 }
 .auk-slider__stop {
   position: absolute;

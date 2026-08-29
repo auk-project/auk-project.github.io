@@ -1,0 +1,16 @@
+任务: ss_voice_en
+分类: 说话人分离 Speaker Separation
+
+===== PE 前 prompt（原始指令）=====
+Two people are talking here. Keep only the speaker with the deeper voice.
+
+===== PE 后 prompt（规范指令 × seeds）=====
+1. This audio contains multiple speakers. Please locate the speaker who says "the speaker with the deeper voice" and output only this speaker's clean voice; the other speakers should be removed as well.
+2. This audio contains multiple speakers. Please locate the speaker who says "the speaker with the deeper voice" and output only this speaker's clean voice; the other speakers should be removed as well, and meanwhile denoise the audio.
+3. Please extract the speaker who says "the speaker with the deeper voice" and keep only this person's voice; remove all other speakers, and meanwhile denoise the audio, producing a single-speaker clean speech of the same length as the input.
+
+输入音频 ASR: In the rest of the work, the power of language seems to fail him.（en）
+
+任务类型: separate_speech / by_content
+目标时长: 5.13s
+随机种子: 44,45,46
