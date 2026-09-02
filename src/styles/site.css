@@ -443,59 +443,6 @@ button {
   border-radius: 50%;
 }
 
-/* ============ Capability atlas ============= */
-/* Capability figure placed under the abstract logos */
-.abstract-figure {
-  margin: 1.5rem auto 0;
-  text-align: center;
-}
-.abstract-figure img {
-  width: 100%;
-  max-width: 720px;
-  margin: 0 auto;
-  border-radius: var(--radius-md);
-  border: 1px solid var(--rule);
-  box-shadow: var(--shadow-card);
-}
-.abstract-figure figcaption {
-  margin: 1rem auto 0;
-  color: var(--ink-soft);
-  font-size: var(--fs-lede);
-  line-height: 1.65;
-  max-width: 68ch;
-}
-
-/* Radar charts sit side by side under the capability figure. */
-.radar-grid {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 1.5rem;
-  margin: 2.5rem auto 0;
-}
-.radar-figure {
-  margin: 0;
-  text-align: center;
-}
-.radar-figure img {
-  width: 100%;
-  max-width: 460px;
-  margin: 0 auto;
-  border-radius: var(--radius-md);
-  border: 1px solid var(--rule);
-  background: var(--bg-card);
-}
-.radar-figure figcaption {
-  margin: 1rem auto 0;
-  color: var(--ink-soft);
-  font-size: var(--fs-lede);
-  line-height: 1.65;
-}
-@media (min-width: 768px) {
-  .radar-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-}
-
 /* ============ Capability bar (sticky nav under the Demos heading) ============= */
 .demos {
   background: var(--bg-soft);

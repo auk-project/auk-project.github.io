@@ -32,6 +32,7 @@ interface ChannelState {
   peaks: number[] | null;
   duration: number;
   loading: boolean;
+  loadingPeaks: boolean;
   failed: boolean;
 }
 
@@ -171,6 +172,7 @@ export class AudioPlayer {
       peaks: null,
       duration: 0,
       loading: autoload,
+      loadingPeaks: false,
       failed: false,
     };
   }
@@ -181,10 +183,13 @@ export class AudioPlayer {
     const scrubber = this.root.querySelector(".auk-player__scrubber") as HTMLElement;
     const onSeek = (e: PointerEvent) => {
       const ch = this.current();
-      if (!ch || !ch.duration) return;
+      if (!ch) return;
+      // duration may be 0 before metadata loads; fall back to the audio element's own duration.
+      const dur = ch.duration || ch.audio.duration || 0;
+      if (!dur) return;
       const rect = scrubber.getBoundingClientRect();
       const ratio = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
-      ch.audio.currentTime = ratio * ch.duration;
+      ch.audio.currentTime = ratio * dur;
       this.updateTime();
       this.drawWave();
     };
@@ -291,6 +296,9 @@ export class AudioPlayer {
     if (wasPlaying && next.duration > 0) {
       next.audio.play().catch(() => undefined);
     }
+    // Make sure the new track's waveform is requested right away instead of
+    // waiting for a play event.
+    this.loadPeaks(next);
     if (this.abSwitch) {
       this.abSwitch.querySelectorAll(".auk-player__ab-btn").forEach((btn, i) => {
         btn.setAttribute("aria-selected", i === idx ? "true" : "false");
@@ -378,7 +386,8 @@ export class AudioPlayer {
   }
 
   private async loadPeaks(ch: ChannelState): Promise<void> {
-    if (ch.peaks || ch.failed) return;
+    if (ch.peaks || ch.failed || ch.loadingPeaks) return;
+    ch.loadingPeaks = true;
     try {
       const resp = await fetch(ch.track.url);
       if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
@@ -408,6 +417,8 @@ export class AudioPlayer {
       ch.failed = true;
       this.setStatus(`Could not decode ${ch.track.label}.`);
       this.drawWave();
+    } finally {
+      ch.loadingPeaks = false;
     }
   }
 
@@ -425,6 +436,7 @@ export class AudioPlayer {
     }
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
     ctx.scale(dpr, dpr);
     ctx.clearRect(0, 0, w, h);
 

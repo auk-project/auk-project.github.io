@@ -140,33 +140,36 @@
           <div class="column is-four-fifths">
             <h2 class="title is-3 section-title">Abstract</h2>
             <div class="content has-text-justified">
-              <p class="placeholder">&lt;abstract&gt;</p>
-            </div>
-            <figure class="abstract-figure">
-              <img
-                src="assets/figures/auk-capabilities.png"
-                alt="AuK speech generation and editing capabilities grouped into five task families."
-              />
-              <figcaption>
-                Speech generation and editing capabilities of AuK.
-              </figcaption>
-            </figure>
-
-            <div class="radar-grid">
-              <figure class="radar-figure">
-                <img
-                  src="assets/figures/auk-radar-generation.png"
-                  alt="Radar chart comparing AuK against baselines on speech generation benchmarks."
-                />
-                <figcaption>Speech generation benchmarks.</figcaption>
-              </figure>
-              <figure class="radar-figure">
-                <img
-                  src="assets/figures/auk-radar-editing.png"
-                  alt="Radar chart comparing AuK against baselines on speech editing benchmarks."
-                />
-                <figcaption>Speech editing benchmarks.</figcaption>
-              </figure>
+              <p>
+                We introduce <strong>AuK</strong>, an open-source foundational
+                model that unifies speech generation and editing through a
+                common interface of natural-language instructions and audio
+                context. To support this broad capability set, we construct
+                approximately 3.03 billion instruction–audio instances and 1.95
+                million hours of effective supervision across five task
+                families: speech generation, content editing, enhancement and
+                separation, paralinguistic editing, and acoustic editing. AuK
+                combines a multimodal large language model for semantic
+                conditioning, an audio VAE jointly trained on speech, general
+                audio, and music for acoustic conditioning, and a hybrid
+                rectified-flow Transformer that performs dual-stream MMDiT
+                blocks followed by unified single-stream DiT blocks for
+                generation. Training begins with generation-only warm-up and
+                proceeds to joint generation–editing pre-training. We then
+                apply complementary post-training strategies: human-feedback
+                preference optimization for open-ended editing and reward-based
+                reinforcement learning for speech generation. To reduce
+                inference cost, we further distill the model with consistency
+                initialization and task-routed Decoupled DMD. The resulting
+                AuK-Flash performs 4-step inference without classifier-free
+                guidance and achieves a 4.5 times wall-clock speedup over the
+                full model under matched conditions. Experiments demonstrate
+                leading performance on zero-shot and instruction-controlled
+                speech generation and general instruction-guided editing, while
+                remaining competitive on signal-level restoration tasks. We
+                release both the source code and model weights to support
+                reproducibility and further research.
+              </p>
             </div>
           </div>
         </div>

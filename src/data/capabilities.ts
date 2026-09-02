@@ -892,6 +892,26 @@ export const capabilities: CapabilityFamily[] = [
               out: "assets/audio-norm/accent/accent-fujian-output.wav",
             },
           },
+          {
+            id: "accent-india",
+            lang: "en",
+            label: "Indian accent → Standard Mandarin",
+            instruction: "Deaccent this recording into standard Mandarin",
+            audio: {
+              src: "assets/audio-norm/accent/accent-india-input.wav",
+              out: "assets/audio-norm/accent/accent-india-output.wav",
+            },
+          },
+          {
+            id: "accent-japan",
+            lang: "en",
+            label: "Japanese accent → Standard Mandarin",
+            instruction: "Deaccent this recording into standard Mandarin",
+            audio: {
+              src: "assets/audio-norm/accent/accent-japan-input.wav",
+              out: "assets/audio-norm/accent/accent-japan-output.wav",
+            },
+          },
         ],
       },
     ],
@@ -1059,7 +1079,7 @@ export const headlineStats: { label: string; value: string; note?: string }[] = 
 
 export const resourceLinks: { label: string; href: string | null; icon: string }[] = [
   { label: "Paper", href: null, icon: "arxiv" },
-  { label: "GitHub", href: null, icon: "github" },
-  { label: "Hugging Face", href: null, icon: "hf" },
-  { label: "ModelScope", href: null, icon: "modelscope" },
+  { label: "GitHub", href: "https://github.com/Tencent-Hunyuan/AuK", icon: "github" },
+  { label: "Hugging Face", href: "https://huggingface.co/spaces/tencent/AuK", icon: "hf" },
+  { label: "ModelScope", href: "https://modelscope.cn/models/Tencent-Hunyuan/AuK/files", icon: "modelscope" },
 ];

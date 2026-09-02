@@ -42,7 +42,9 @@ PEAK_RE = re.compile(r"^\s*Peak:\s*(-?[\d.]+|-inf)\s*dBFS", re.M)
 def referenced_paths() -> list[str]:
     """Every assets/audio/... wav the demo data actually loads."""
     text = DATA_FILE.read_text(encoding="utf-8")
-    found = sorted(set(re.findall(r'"assets/audio/([^"]+\.wav)"', text)))
+    # The data file points at the audio-norm mirror; strip that prefix so the
+    # normalized output lands in the same relative location as the master.
+    found = sorted(set(re.findall(r'"assets/audio(?:-norm)?/([^"]+\.wav)"', text)))
     return found
 
 
