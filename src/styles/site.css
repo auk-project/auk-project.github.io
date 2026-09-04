@@ -371,30 +371,15 @@ button {
 .model-pane[hidden] {
   display: none;
 }
-.model-pane__grid {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 1.25rem;
-  align-items: start;
-}
+
 .model-pane__title {
   margin: 0 0 0.6rem;
 }
 .model-pane__body {
   margin: 0;
 }
-.model-pane__logo {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 150px;
-  text-align: center;
-}
 @media (min-width: 860px) {
-  .model-pane__grid {
-    grid-template-columns: minmax(0, 1fr) 240px;
-    gap: 2rem;
-  }}
+}
 
 /* ============ Overview video ============= */
 .video-section {
@@ -439,7 +424,7 @@ button {
   max-height: 34px;
 }
 .affiliation-row img[alt="Shanghai Innovation Institution"] {
-  max-height: 56px;
+  max-height: 50px;
   border-radius: 50%;
 }
 
@@ -1085,7 +1070,7 @@ button {
     max-height: 56px;
   }
   .affiliation-row img[alt="Shanghai Innovation Institution"] {
-    max-height: 64px;
+    max-height: 50px;
   }
 }
 
