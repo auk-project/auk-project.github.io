@@ -386,6 +386,32 @@ button {
   border-top: none;
   padding: 2.5rem 0 3rem;
 }
+.video-lang-toggle {
+  display: flex;
+  gap: 0.4rem;
+  margin: 0 auto 1rem;
+  padding: 0.25rem;
+  background: var(--bg-soft);
+  border: 1px solid var(--rule);
+  border-radius: 9999px;
+  width: fit-content;
+}
+.video-lang-btn {
+  font-family: var(--font-display);
+  font-size: 0.85rem;
+  padding: 0.35em 1.1em;
+  border: 0;
+  background: transparent;
+  color: var(--ink-soft);
+  border-radius: 9999px;
+  cursor: pointer;
+  transition: background 120ms ease, color 120ms ease;
+}
+.video-lang-btn:hover { color: var(--ink); }
+.video-lang-btn.is-active {
+  background: var(--brand-blue);
+  color: #fff;
+}
 .video-figure {
   margin: 0;
   max-width: 880px;

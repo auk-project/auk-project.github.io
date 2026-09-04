@@ -1081,5 +1081,5 @@ export const resourceLinks: { label: string; href: string | null; icon: string }
   { label: "Paper", href: null, icon: "arxiv" },
   { label: "GitHub", href: "https://github.com/Tencent-Hunyuan/AuK", icon: "github" },
   { label: "Hugging Face", href: "https://huggingface.co/spaces/tencent/AuK", icon: "hf" },
-  { label: "ModelScope", href: "https://modelscope.cn/models/Tencent-Hunyuan/AuK/files", icon: "modelscope" },
+  { label: "ModelScope", href: "https://modelscope.cn/studios/Tencent-Hunyuan/AuK", icon: "modelscope" },
 ];

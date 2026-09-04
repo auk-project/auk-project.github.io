@@ -117,9 +117,14 @@
     <!-- ===== Overview video ===== -->
     <section class="section video-section" id="overview-video">
       <div class="container is-max-desktop">
+        <div class="video-lang-toggle" role="tablist" aria-label="Demo video language">
+          <button type="button" class="video-lang-btn is-active" data-video-lang="en" role="tab" aria-selected="true">English</button>
+          <button type="button" class="video-lang-btn" data-video-lang="zh" role="tab" aria-selected="false">中文</button>
+        </div>
         <figure class="video-figure">
           <video
             class="video-player"
+            id="demo-video"
             controls
             preload="metadata"
             playsinline

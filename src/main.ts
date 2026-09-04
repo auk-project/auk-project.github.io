@@ -46,9 +46,9 @@ function renderIcon(kind: string): string {
     case "github":
       return `<span ${common}><svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M12 .5a11.5 11.5 0 0 0-3.64 22.41c.58.11.79-.25.79-.56v-2.1c-3.2.7-3.88-1.37-3.88-1.37-.53-1.34-1.3-1.7-1.3-1.7-1.05-.72.08-.71.08-.71 1.17.08 1.78 1.2 1.78 1.2 1.04 1.78 2.72 1.27 3.38.97.1-.76.4-1.27.74-1.56-2.55-.29-5.24-1.27-5.24-5.66 0-1.25.45-2.27 1.18-3.07-.12-.29-.51-1.46.11-3.05 0 0 .96-.31 3.15 1.17a10.9 10.9 0 0 1 5.74 0c2.18-1.48 3.14-1.17 3.14-1.17.63 1.59.24 2.76.12 3.05.74.8 1.18 1.82 1.18 3.07 0 4.4-2.69 5.36-5.25 5.65.41.35.78 1.05.78 2.12v3.14c0 .31.21.68.8.56A11.5 11.5 0 0 0 12 .5z"/></svg></span>`;
     case "hf":
-      return `<span ${common}><svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><circle cx="12" cy="12" r="11" fill="none" stroke="currentColor" stroke-width="1.5"/><circle cx="9.5" cy="11" r="1.2"/><circle cx="14.5" cy="11" r="1.2"/><path d="M9 15.5q1.5 1.5 3 1.5t3-1.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></span>`;
+      return `<img ${common} src="assets/brand/hf-logo.svg" width="20" height="20" alt="" style="display:inline-block;object-fit:contain;border-radius:4px" />`;
     case "modelscope":
-      return `<span ${common}><svg viewBox="0 0 24 24" width="17" height="17" fill="currentColor"><path d="M3 7h4v4H3zm0 6h4v4H3zm7-9h4v4h-4zm0 6h4v4h-4zm0 6h4v4h-4zm7-9h4v4h-4zm0 6h4v4h-4z"/></svg></span>`;
+      return `<img ${common} src="assets/brand/modelscope-icon.png" width="20" height="20" alt="" style="display:inline-block;object-fit:contain;border-radius:4px" />`;
     default:
       return `<span ${common}></span>`;
   }
@@ -700,6 +700,35 @@ function attachTrackSwitches(): void {
   });
 }
 
+function attachVideoLangSwitch(): void {
+  // Toggle the demo video between the English and Mandarin cuts without
+  // changing the rest of the page.
+  const video = document.getElementById("demo-video") as HTMLVideoElement | null;
+  if (!video) return;
+  const btns = document.querySelectorAll<HTMLButtonElement>(".video-lang-btn");
+  const sources: Record<string, string> = {
+    en: "assets/video/auk-overview.mp4",
+    zh: "assets/video/auk-overview-zh.mp4",
+  };
+  btns.forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const lang = btn.dataset.videoLang;
+      if (!lang || !sources[lang]) return;
+      const wasPlaying = !video.paused && !video.ended;
+      const t = video.currentTime;
+      video.src = sources[lang];
+      video.load();
+      video.currentTime = t;
+      if (wasPlaying) video.play().catch(() => undefined);
+      btns.forEach((b) => {
+        const on = b === btn;
+        b.classList.toggle("is-active", on);
+        b.setAttribute("aria-selected", on ? "true" : "false");
+      });
+    });
+  });
+}
+
 function init(): void {
   buildResourceLinks();
   // Demos must exist before the rail runs: the rail hides every family but the
@@ -711,6 +740,7 @@ function init(): void {
   attachSliderLogic();
   mountAllAudioPlayers();
   attachTrackSwitches();
+  attachVideoLangSwitch();
   window.addEventListener("resize", redrawAllPlayers);
 }
 
