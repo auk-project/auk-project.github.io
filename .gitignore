@@ -5,3 +5,5 @@ dist/
 .Temp/
 # 根目录原始素材（母版 wav），不随仓库分发
 /*.wav
+# 音频母版目录（audio-norm 为部署用规范化镜像），本地保留不入库
+public/assets/audio/
