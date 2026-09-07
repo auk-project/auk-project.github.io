@@ -382,6 +382,28 @@ button {
 }
 
 /* ============ Overview video ============= */
+/* SOTA comparison figure under the abstract. */
+.sota-figure {
+  margin: 2.5rem auto 0;
+  text-align: center;
+}
+.sota-figure img {
+  width: 100%;
+  max-width: 1150px;
+  margin: 0 auto;
+}
+.sota-figure figcaption {
+  margin: 1rem auto 0;
+  color: var(--ink-faint);
+  font-size: 0.85rem;
+  line-height: 1.6;
+  max-width: 125ch;
+  text-align: left;
+}
+.sota-figure figcaption strong {
+  color: var(--ink-soft);
+}
+
 .video-section {
   border-top: none;
   padding: 2.5rem 0 3rem;
