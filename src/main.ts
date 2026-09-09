@@ -30,10 +30,13 @@ function buildResourceLinks(): void {
   container.innerHTML = resourceLinks
     .map((l) => {
       const icon = renderIcon(l.icon);
+      const flash = l.flashHref ?? l.href ?? "";
+      // Both model-variant URLs ride on the element so the tab switch can
+      // re-point the button without re-rendering.
       if (l.href) {
-        return `<span class="link-block"><a href="${escapeHtml(l.href)}" class="external-link button is-normal is-rounded is-dark" target="_blank" rel="noopener">${icon}<span>${escapeHtml(l.label)}</span></a></span>`;
+        return `<span class="link-block"><a href="${escapeHtml(l.href)}" data-href-auk="${escapeHtml(l.href)}" data-href-flash="${escapeHtml(flash)}" class="external-link button is-normal is-rounded is-dark" target="_blank" rel="noopener">${icon}<span>${escapeHtml(l.label)}</span></a></span>`;
       }
-      return `<span class="link-block"><span class="external-link button is-normal is-rounded is-dark is-disabled" aria-disabled="true">${icon}<span>${escapeHtml(l.label)}</span></span></span>`;
+      return `<span class="link-block"><span class="external-link button is-normal is-rounded is-dark is-disabled" aria-disabled="true" title="Coming soon">${icon}<span>${escapeHtml(l.label)}</span></span></span>`;
     })
     .join("");
 }
@@ -42,7 +45,8 @@ function renderIcon(kind: string): string {
   const common = 'class="icon" aria-hidden="true"';
   switch (kind) {
     case "arxiv":
-      return `<span ${common}><svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M3 4h18v3H3zm0 4.5h18v3H3zm0 4.5h18v3H3zm0 4.5h18v3H3z"/></svg></span>`;
+      // Official arXiv logomark (red/grey, from arxiv.org).
+      return `<span ${common}><svg viewBox="0 0 135.611 201" width="14" height="21" aria-hidden="true"><g><path d="M456.756,249.1l-42.324,49.375c-1.885,2.01-3.054,5.535-2,8.066a6.9,6.9,0,0,0,6.443,4.27c1.6,0,2.911-.56,4.631-2.289l52.364-54.278a8.927,8.927,0,0,0,.061-12.584Z" transform="translate(-391.029 -166.577)" fill="#aa142d"/><path d="M455.876,248.071l39.168-49.545c2.186-2.914,3.219-4.44,2.186-6.921a7.536,7.536,0,0,0-6.566-4.633h0a5.9,5.9,0,0,0-4.408,1.624l-50.072,53.061c-3.816,3.816-3.808,8.753.023,12.584l70.031,73.438a5.738,5.738,0,0,0,4.6,1.748c2.833,0,4.67-1.667,5.9-4.131,1.054-2.531-.112-5.038-2.056-7.664l-58.8-69.561" transform="translate(-391.029 -166.577)" fill="#bdb9b4"/><path d="M475.931,241.657l-68.388-71.966s-2.511-3.048-5.165-3.112a6.75,6.75,0,0,0-6.357,4.084c-1.033,2.481-.291,4.223,1.977,7.47L456.756,249.1Z" transform="translate(-391.029 -166.577)" fill="#aa142d"/><path d="M472.39,367.577a2.2,2.2,0,0,1-1.895-1.1l-8.528-14.161-8.576,14.161a2.152,2.152,0,0,1-1.9,1.1,2.33,2.33,0,0,1-2.343-2.3,2.269,2.269,0,0,1,.348-1.246l9.925-15.907L451.3,335.114a2.722,2.722,0,0,1-.351-1.247,2.331,2.331,0,0,1,2.347-2.292,2.093,2.093,0,0,1,1.894,1.046l6.779,11.42,6.734-11.42a2.011,2.011,0,0,1,1.843-1.046,2.268,2.268,0,0,1,2.346,2.292,2.7,2.7,0,0,1-.3,1.247l-8.079,13.015,9.825,15.907a1.956,1.956,0,0,1,.4,1.246A2.363,2.363,0,0,1,472.39,367.577Z" transform="translate(-391.029 -166.577)"/><path d="M429.138,342.132c1.021,0,1.7.681,2.188,1.9a2.817,2.817,0,0,1,2.578-1.9h8.169a2.231,2.231,0,0,1,2.237,2.237v4.3a1.983,1.983,0,0,1-2.237,2.237,2,2,0,0,1-2.237-2.237v-2.061h-5.787a1.324,1.324,0,0,0-1.458,1.507v14.929h5.494a2.237,2.237,0,1,1,0,4.473H423.6a2.237,2.237,0,0,1,0-4.473h4.522V346.606H424.13a2.238,2.238,0,0,1,0-4.474Z" transform="translate(-391.029 -166.577)"/><path d="M490.449,342.132a2,2,0,0,1,2.237,2.237v18.673h5.543a2.237,2.237,0,1,1,0,4.473H482.523a2.237,2.237,0,1,1,0-4.473h5.69V346.606h-4.686a2.237,2.237,0,0,1,0-4.474Zm2.317-9.672a3.217,3.217,0,1,1-3.194-3.195A3.241,3.241,0,0,1,492.766,332.46Z" transform="translate(-391.029 -166.577)"/><path d="M526.64,344.369a2.527,2.527,0,0,1-.147.875l-8.169,20.91a2.042,2.042,0,0,1-2.043,1.361h-3.258a2.027,2.027,0,0,1-2.091-1.361l-8.266-20.91a1.78,1.78,0,0,1-.195-.875,2.242,2.242,0,0,1,2.286-2.237,2.086,2.086,0,0,1,2.042,1.459l7.878,19.84,7.634-19.84a2.087,2.087,0,0,1,2.043-1.459A2.242,2.242,0,0,1,526.64,344.369Z" transform="translate(-391.029 -166.577)"/><path d="M408.844,342.132a4.268,4.268,0,0,1,4.506,4.611v20.772h-19.5a2.643,2.643,0,0,1-2.824-2.706v-7.153a4.533,4.533,0,0,1,3.842-4.474l14-1.961v-4.615H393.3a2.2,2.2,0,0,1-2.274-2.237,2.173,2.173,0,0,1,2.391-2.237Zm.032,20.91v-7.3L395.5,357.607v5.435Z" transform="translate(-391.029 -166.577)"/></g></svg></span>`;
     case "github":
       return `<span ${common}><svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M12 .5a11.5 11.5 0 0 0-3.64 22.41c.58.11.79-.25.79-.56v-2.1c-3.2.7-3.88-1.37-3.88-1.37-.53-1.34-1.3-1.7-1.3-1.7-1.05-.72.08-.71.08-.71 1.17.08 1.78 1.2 1.78 1.2 1.04 1.78 2.72 1.27 3.38.97.1-.76.4-1.27.74-1.56-2.55-.29-5.24-1.27-5.24-5.66 0-1.25.45-2.27 1.18-3.07-.12-.29-.51-1.46.11-3.05 0 0 .96-.31 3.15 1.17a10.9 10.9 0 0 1 5.74 0c2.18-1.48 3.14-1.17 3.14-1.17.63 1.59.24 2.76.12 3.05.74.8 1.18 1.82 1.18 3.07 0 4.4-2.69 5.36-5.25 5.65.41.35.78 1.05.78 2.12v3.14c0 .31.21.68.8.56A11.5 11.5 0 0 0 12 .5z"/></svg></span>`;
     case "hf":
@@ -623,6 +627,12 @@ function attachModelTabs(): void {
   const show = (model: string) => {
     tabs.forEach((t) => t.setAttribute("aria-selected", t.dataset.model === model ? "true" : "false"));
     panes.forEach((p) => (p.hidden = p.dataset.model !== model));
+    // Resource buttons follow the selected model variant (AuK vs AuK-Flash).
+    document
+      .querySelectorAll<HTMLAnchorElement>('#resource-links a[data-href-auk][data-href-flash]')
+      .forEach((a) => {
+        a.href = model === "flash" ? a.dataset.hrefFlash! : a.dataset.hrefAuk!;
+      });
   };
 
   tabs.forEach((tab, i) => {

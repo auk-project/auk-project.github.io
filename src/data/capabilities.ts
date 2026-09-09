@@ -1077,9 +1077,20 @@ export const headlineStats: { label: string; value: string; note?: string }[] = 
   { label: "AuK-Flash sampling steps", value: "4", note: "4.5× speedup" },
 ];
 
-export const resourceLinks: { label: string; href: string | null; icon: string }[] = [
-  { label: "Paper", href: null, icon: "arxiv" },
-  { label: "GitHub", href: "https://github.com/Tencent-Hunyuan/AuK", icon: "github" },
-  { label: "Hugging Face", href: "https://huggingface.co/spaces/tencent/AuK", icon: "hf" },
-  { label: "ModelScope", href: "https://modelscope.cn/studios/Tencent-Hunyuan/AuK", icon: "modelscope" },
+export interface ResourceLink {
+  label: string;
+  icon: string;
+  /** href when the base model tab is active. */
+  href: string | null;
+  /** href when the AuK-Flash tab is active; defaults to `href`. */
+  flashHref?: string | null;
+}
+
+export const resourceLinks: ResourceLink[] = [
+  // The paper is not out yet; the button mirrors the "coming soon" convention
+  // used on other project pages instead of pointing at a placeholder arXiv id.
+  { label: "Coming Soon", icon: "arxiv", href: null },
+  { label: "GitHub", icon: "github", href: "https://github.com/Tencent-Hunyuan/AuK", flashHref: "https://github.com/Tencent-Hunyuan/AuK-Flash" },
+  { label: "Hugging Face", icon: "hf", href: "https://huggingface.co/tencent/AuK", flashHref: "https://huggingface.co/tencent/AuK-Flash" },
+  { label: "ModelScope", icon: "modelscope", href: "https://modelscope.cn/models/Tencent-Hunyuan/AuK/", flashHref: "https://modelscope.cn/models/Tencent-Hunyuan/AuK-Flash/" },
 ];

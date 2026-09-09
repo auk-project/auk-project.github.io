@@ -280,6 +280,7 @@ button {
   display: inline-block;
 }
 .link-block a,
+.link-block span.button,
 .link-block span.placeholder {
   margin-top: 0.4rem;
   margin-bottom: 0.4rem;
