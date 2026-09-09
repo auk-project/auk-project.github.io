@@ -1087,9 +1087,7 @@ export interface ResourceLink {
 }
 
 export const resourceLinks: ResourceLink[] = [
-  // The paper is not out yet; the button mirrors the "coming soon" convention
-  // used on other project pages instead of pointing at a placeholder arXiv id.
-  { label: "Coming Soon", icon: "arxiv", href: null },
+  { label: "Paper", icon: "arxiv", href: "https://arxiv.org/abs/2609.08936" },
   { label: "GitHub", icon: "github", href: "https://github.com/Tencent-Hunyuan/AuK", flashHref: "https://github.com/Tencent-Hunyuan/AuK-Flash" },
   { label: "Hugging Face", icon: "hf", href: "https://huggingface.co/tencent/AuK", flashHref: "https://huggingface.co/tencent/AuK-Flash" },
   { label: "ModelScope", icon: "modelscope", href: "https://modelscope.cn/models/Tencent-Hunyuan/AuK/", flashHref: "https://modelscope.cn/models/Tencent-Hunyuan/AuK-Flash/" },
