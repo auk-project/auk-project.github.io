@@ -7,3 +7,5 @@ dist/
 /*.wav
 # 音频母版目录（audio-norm 为部署用规范化镜像），本地保留不入库
 public/assets/audio/
+# 内部实验记录，页面无引用；放在 public/ 下会被 Vite 原样部署上线
+public/auk_pass_results/
