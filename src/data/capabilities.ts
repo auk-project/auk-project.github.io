@@ -1088,7 +1088,7 @@ export interface ResourceLink {
 
 export const resourceLinks: ResourceLink[] = [
   { label: "Paper", icon: "arxiv", href: "https://arxiv.org/abs/2609.08936" },
-  { label: "GitHub", icon: "github", href: "https://github.com/Tencent-Hunyuan/AuK", flashHref: "https://github.com/Tencent-Hunyuan/AuK-Flash" },
+  { label: "GitHub", icon: "github", href: "https://github.com/Tencent-Hunyuan/AuK" },
   { label: "Hugging Face", icon: "hf", href: "https://huggingface.co/tencent/AuK", flashHref: "https://huggingface.co/tencent/AuK-Flash" },
   { label: "ModelScope", icon: "modelscope", href: "https://modelscope.cn/models/Tencent-Hunyuan/AuK/", flashHref: "https://modelscope.cn/models/Tencent-Hunyuan/AuK-Flash/" },
 ];
